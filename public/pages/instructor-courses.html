@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Courses - Instructor - LMS</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: var(--bg-darker);
+        }
+
+        .page-header {
+            background: var(--bg-light);
+            border-bottom: 1px solid var(--border);
+            padding: var(--spacing-xl) 0;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .course-card {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .course-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .course-badge {
+            display: inline-block;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="navbar-container"></div>
+
+    <div class="page-header">
+        <div class="container flex-between">
+            <div>
+                <h1>My Courses</h1>
+                <p class="text-muted mb-0">Manage your published courses</p>
+            </div>
+            <a href="/pages/upload-course.html" class="btn btn-primary">+ Upload Course</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="coursesList">
+            <p class="text-center text-muted">Loading courses...</p>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/utils.js"></script>
+    <script>
+        if (!auth.requireAuth('instructor')) { }
+        initPage('instructor');
+
+        async function loadCourses() {
+            try {
+                showLoading();
+                const response = await api.getInstructorCourses();
+                const courses = response.data?.courses || [];
+                hideLoading();
+
+                const container = document.getElementById('coursesList');
+
+                if (courses.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center" style="padding: var(--spacing-2xl);">
+                            <h3>No courses yet</h3>
+                            <p class="text-muted">Start by uploading your first course</p>
+                            <a href="/pages/upload-course.html" class="btn btn-primary mt-3">Upload Course</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = courses.map(course => `
+                    <div class="course-card">
+                        <div class="course-header">
+                            <div>
+                                <h3>${course.title}</h3>
+                                <span class="course-badge" style="background: rgba(102, 126, 234, 0.2); color: var(--primary);">
+                                    ${getContentTypeIcon(course.contentType)} ${course.contentType.toUpperCase()}
+                                </span>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--success);">
+                                    ${formatCurrency(course.price)}
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-muted">${course.description}</p>
+                        <div style="display: flex; gap: var(--spacing-md); margin-top: var(--spacing-md);">
+                            <small class="text-muted">Created: ${formatDate(course.createdAt)}</small>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                hideLoading();
+                showToast('Failed to load courses', 'error');
+            }
+        }
+
+        loadCourses();
+    </script>
+</body>
+
+</html>

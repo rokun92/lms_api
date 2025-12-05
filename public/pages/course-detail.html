@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Details - LMS</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: var(--bg-darker);
+        }
+
+        .course-hero {
+            background: var(--gradient-primary);
+            padding: var(--spacing-2xl) 0;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .course-hero h1 {
+            color: white;
+        }
+
+        .course-hero p {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .content-section {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .purchase-card {
+            position: sticky;
+            top: var(--spacing-lg);
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            background: var(--bg-light);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: var(--spacing-sm);
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="password"] {
+            width: 100%;
+            padding: var(--spacing-md);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: var(--bg-darker);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            margin: 0;
+            cursor: pointer;
+            user-select: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="navbar-container"></div>
+
+    <div class="course-hero">
+        <div class="container">
+            <h1 id="courseTitle">Loading...</h1>
+            <p id="courseDescription"></p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="grid grid-3">
+            <div id="mainContentColumn" style="grid-column: span 2;">
+                <div class="content-section">
+                    <h2>About This Course</h2>
+                    <p id="fullDescription" class="text-muted"></p>
+                </div>
+
+                <div class="content-section" id="courseContentSection" style="display: none;">
+                    <h2>Course Content</h2>
+                    <div id="courseContent"></div>
+                </div>
+            </div>
+
+            <div id="sidebarColumn">
+                <div class="purchase-card">
+                    <div id="priceSection">
+                        <h2 id="coursePrice" style="color: var(--success); margin-bottom: var(--spacing-md);"></h2>
+                    </div>
+
+                    <div id="actionSection"></div>
+
+                    <div class="mt-3">
+                        <h4>Includes:</h4>
+                        <ul style="margin-left: var(--spacing-lg); color: var(--text-secondary);">
+                            <li>Full lifetime access</li>
+                            <li>Learn at your own pace</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/utils.js"></script>
+    <script>
+        const isAuth = auth.isAuthenticated();
+        const role = auth.getUserRole();
+        initPage(role);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const courseId = urlParams.get('id');
+
+        if (!courseId) {
+            showToast('Course not found', 'error');
+            setTimeout(() => window.location.href = '/pages/courses.html', 1500);
+        }
+
+        let courseData = null;
+        let isEnrolled = false;
+
+        async function loadCourse() {
+            try {
+                showLoading();
+                const response = await api.getCourseById(courseId);
+                courseData = response.data?.course;
+                const course = courseData;
+
+                document.getElementById('courseTitle').textContent = course.title;
+                document.getElementById('fullDescription').textContent = course.description;
+                document.getElementById('coursePrice').textContent = formatCurrency(course.price);
+
+                // Check if enrolled
+                if (isAuth && role === 'learner') {
+                    try {
+                        const contentResponse = await api.getCourseContent(courseId);
+                        isEnrolled = true;
+                        displayEnrolledView(course, contentResponse.data);
+                    } catch (error) {
+                        displayPurchaseView(course);
+                    }
+                } else {
+                    displayPurchaseView(course);
+                }
+
+                hideLoading();
+            } catch (error) {
+                hideLoading();
+                showToast('Failed to load course', 'error');
+            }
+        }
+
+        function displayPurchaseView(course) {
+            const actionSection = document.getElementById('actionSection');
+            const isFree = parseFloat(course.price) === 0;
+
+            if (!isAuth) {
+                actionSection.innerHTML = `
+                    <a href="/pages/login.html" class="btn btn-primary" style="width: 100%;">Login to ${isFree ? 'Enroll' : 'Purchase'}</a>
+                `;
+            } else if (role === 'learner') {
+                if (isFree) {
+                    actionSection.innerHTML = `
+                        <button onclick="enrollFree()" class="btn btn-success" style="width: 100%;">Enroll Free</button>
+                    `;
+                } else {
+                    actionSection.innerHTML = `
+                        <button onclick="openPaymentModal()" class="btn btn-primary" style="width: 100%;">Purchase Course</button>
+                    `;
+                }
+            } else {
+                actionSection.innerHTML = `
+                    <p class="text-muted text-center">Instructors cannot purchase courses</p>
+                `;
+            }
+        }
+
+        function displayEnrolledView(course, contentData) {
+            // Hide sidebar and expand main content
+            document.getElementById('sidebarColumn').style.display = 'none';
+            document.getElementById('mainContentColumn').style.gridColumn = '1 / -1';
+
+            const contentSection = document.getElementById('courseContentSection');
+            const contentDiv = document.getElementById('courseContent');
+            contentSection.style.display = 'block';
+
+            // Add content
+            if (course.contentType === 'text') {
+                contentDiv.innerHTML = `<p>${contentData.course.textContent}</p>`;
+            } else if (course.contentType === 'video' || course.contentType === 'audio') {
+                contentDiv.innerHTML = `
+                    <${course.contentType} controls style="width: 100%; max-width: 100%;">
+                        <source src="${contentData.course.fileUrl}">
+                    </${course.contentType}>
+                `;
+            } else if (course.contentType === 'mcq') {
+                displayQuiz(contentData.course.mcqContent);
+            }
+
+            // Add complete button at the bottom of content
+            const completeBtnContainer = document.createElement('div');
+            completeBtnContainer.className = 'mt-4';
+            completeBtnContainer.innerHTML = `
+                <button onclick="completeCourse()" class="btn btn-success" style="width: 100%; max-width: 300px;">Mark as Complete</button>
+            `;
+            contentDiv.appendChild(completeBtnContainer);
+        }
+
+        function displayQuiz(questions) {
+            const contentDiv = document.getElementById('courseContent');
+            contentDiv.innerHTML = questions.map((q, i) => `
+                <div style="margin-bottom: var(--spacing-lg);">
+                    <h4>Question ${i + 1}: ${q.question}</h4>
+                    ${q.options.map((opt, j) => `
+                        <div style="margin: var(--spacing-sm) 0;">
+                            <label style="display: flex; align-items: center; gap: var(--spacing-sm);">
+                                <input type="radio" name="q${i}" value="${j}">
+                                <span>${opt}</span>
+                            </label>
+                        </div>
+                    `).join('')}
+                </div>
+            `).join('');
+        }
+
+        async function enrollFree() {
+            // For free courses, no bank credentials needed
+            try {
+                showLoading();
+                await api.purchaseCourse(courseId);
+                hideLoading();
+                showToast('Enrolled successfully!', 'success');
+                setTimeout(() => location.reload(), 1500);
+            } catch (error) {
+                hideLoading();
+                showToast(error.message || 'Enrollment failed', 'error');
+            }
+        }
+
+        async function openPaymentModal() {
+            // Use Stripe Checkout for paid courses
+            try {
+                showLoading();
+
+                // Create Stripe checkout session
+                const response = await fetch('/api/payment/create-checkout-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({ courseId })
+                });
+
+                const data = await response.json();
+                hideLoading();
+
+                if (data.success) {
+                    // Redirect to Stripe Checkout
+                    window.location.href = data.data.url;
+                } else {
+                    showToast(data.message || 'Failed to initiate payment', 'error');
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Payment error:', error);
+                showToast('Failed to initiate payment', 'error');
+            }
+        }
+
+        function closePaymentModal() {
+            // Not needed anymore, but kept for compatibility
+        }
+
+        async function purchaseCourse() {
+            // This function is now handled by Stripe
+            // Kept for backward compatibility
+        }
+
+        async function completeCourse() {
+            try {
+                showLoading();
+                const response = await api.completeCourse(courseId);
+                hideLoading();
+                showToast('Congratulations! Course completed.', 'success');
+                setTimeout(() => window.location.href = '/pages/learner-dashboard.html', 2000);
+            } catch (error) {
+                hideLoading();
+                showToast(error.message || 'Failed to complete course', 'error');
+            }
+        }
+
+        loadCourse();
+    </script>
+</body>
+
+</html>

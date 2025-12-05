@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learner Dashboard - LMS</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: var(--bg-darker);
+        }
+
+        .dashboard-header {
+            background: var(--gradient-primary);
+            padding: var(--spacing-2xl) 0;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .welcome-section h1 {
+            color: white;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .welcome-section p {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .stat-card {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-lg);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .course-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        .course-card {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            transition: all var(--transition-base);
+        }
+
+        .course-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .course-image {
+            height: 180px;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+        }
+
+        .course-content {
+            padding: var(--spacing-lg);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-dark);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            margin: var(--spacing-md) 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-primary);
+            transition: width var(--transition-slow);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="navbar-container"></div>
+
+    <div class="dashboard-header">
+        <div class="container welcome-section">
+            <h1 id="welcomeText">Welcome back!</h1>
+            <p>Continue your learning journey</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-value" id="enrolledCount">0</div>
+                <div class="text-muted">Enrolled Courses</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="completedCount">0</div>
+                <div class="text-muted">Completed</div>
+            </div>
+        </div>
+
+        <div class="flex-between mb-3">
+            <h2>My Enrolled Courses</h2>
+            <a href="/pages/courses.html" class="btn btn-primary">Browse More Courses</a>
+        </div>
+
+        <div id="enrolledCourses" class="course-grid">
+            <p class="text-muted">Loading...</p>
+        </div>
+
+        <h2 class="mt-4">Available Courses</h2>
+        <div id="availableCourses" class="course-grid">
+            <p class="text-muted">Loading...</p>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/utils.js"></script>
+    <script>
+        if (!auth.requireAuth('learner')) { }
+        initPage('learner');
+
+        async function loadDashboard() {
+            try {
+                showLoading();
+
+                const user = auth.getCurrentUser();
+                document.getElementById('welcomeText').textContent = `Welcome back, ${user.name}!`;
+
+                const [homeResponse] = await Promise.all([
+                    api.getLearnerHome()
+                ]);
+
+                const homeData = homeResponse.data || {};
+                const enrolled = homeData.enrolledCourses || [];
+                const available = homeData.availableCourses || [];
+
+                document.getElementById('enrolledCount').textContent = enrolled.length;
+                document.getElementById('completedCount').textContent = enrolled.filter(e => e.completed).length;
+
+                displayEnrolledCourses(enrolled);
+                displayAvailableCourses(available.slice(0, 3));
+
+                hideLoading();
+            } catch (error) {
+                hideLoading();
+                showToast('Failed to load dashboard', 'error');
+            }
+        }
+
+        function displayEnrolledCourses(courses) {
+            const container = document.getElementById('enrolledCourses');
+            if (courses.length === 0) {
+                container.innerHTML = '<p class="text-muted">No enrolled courses yet. Browse courses to get started!</p>';
+                return;
+            }
+
+            container.innerHTML = courses.map(enrollment => {
+                const course = enrollment.course;
+                return `
+                    <div class="course-card">
+                        <div class="course-image">${getContentTypeIcon(course.contentType)}</div>
+                        <div class="course-content">
+                            <h3>${course.title}</h3>
+                            <p class="text-muted">${truncate(course.description, 80)}</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${enrollment.progress}%"></div>
+                            </div>
+                            <small class="text-muted">${enrollment.progress}% Complete</small>
+                            <div class="mt-2">
+                                ${enrollment.completed
+                        ? `
+                            <span class="btn btn-success btn-sm mb-2" style="width: 100%; display: block;">✓ Completed</span>
+                            ${enrollment.certificateUrl ? `<a href="${enrollment.certificateUrl}" target="_blank" class="btn btn-outline-primary btn-sm" style="width: 100%; display: block;">View Certificate</a>` : ''}
+                          `
+                        : `<a href="/pages/course-detail.html?id=${course.id}" class="btn btn-primary btn-sm" style="width: 100%;">Continue Learning</a>`
+                    }
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function displayAvailableCourses(courses) {
+            const container = document.getElementById('availableCourses');
+            if (courses.length === 0) {
+                container.innerHTML = '<p class="text-muted">No courses available</p>';
+                return;
+            }
+
+            container.innerHTML = courses.map(course => `
+                <div class="course-card">
+                    <div class="course-image">${getContentTypeIcon(course.contentType)}</div>
+                    <div class="course-content">
+                        <h3>${course.title}</h3>
+                        <p class="text-muted">${truncate(course.description, 80)}</p>
+                        <div class="flex-between mt-2">
+                            <span style="font-size: 1.25rem; font-weight: 700; color: var(--success);">${formatCurrency(course.price)}</span>
+                            <a href="/pages/course-detail.html?id=${course.id}" class="btn btn-primary btn-sm">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        loadDashboard();
+    </script>
+</body>
+
+</html>

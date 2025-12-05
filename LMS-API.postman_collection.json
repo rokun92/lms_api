@@ -1,0 +1,443 @@
+{
+    "info": {
+        "name": "LMS API",
+        "description": "Complete API collection for Learning Management System",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:3000",
+            "type": "string"
+        },
+        {
+            "key": "token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "courseId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "accountNumber",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "1. Authentication",
+            "item": [
+                {
+                    "name": "Register Learner",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"student@test.com\",\n  \"password\": \"password123\",\n  \"name\": \"Test Student\",\n  \"role\": \"learner\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/auth/register"
+                        }
+                    }
+                },
+                {
+                    "name": "Register Instructor",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"teacher@test.com\",\n  \"password\": \"password123\",\n  \"name\": \"Test Teacher\",\n  \"role\": \"instructor\",\n  \"bio\": \"Experienced educator\",\n  \"expertise\": \"Computer Science\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/auth/register"
+                        }
+                    }
+                },
+                {
+                    "name": "Login Instructor",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"instructor1@lms.com\",\n  \"password\": \"password123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/auth/login"
+                        }
+                    }
+                },
+                {
+                    "name": "Login Learner",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"student@test.com\",\n  \"password\": \"password123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/auth/login"
+                        }
+                    }
+                },
+                {
+                    "name": "Get Profile",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/auth/profile"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "2. Instructor",
+            "item": [
+                {
+                    "name": "Upload Text Course",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Introduction to JavaScript\",\n  \"description\": \"Learn JavaScript from scratch\",\n  \"contentType\": \"text\",\n  \"textContent\": \"JavaScript is a programming language...\",\n  \"price\": 100\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/instructor/courses"
+                        }
+                    }
+                },
+                {
+                    "name": "Upload MCQ Course",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"JavaScript Quiz\",\n  \"description\": \"Test your JavaScript knowledge\",\n  \"contentType\": \"mcq\",\n  \"mcqContent\": [\n    {\n      \"question\": \"What is JavaScript?\",\n      \"options\": [\"A programming language\", \"A coffee type\", \"A framework\"],\n      \"correctAnswer\": 0\n    }\n  ],\n  \"price\": 50\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/instructor/courses"
+                        }
+                    }
+                },
+                {
+                    "name": "Get My Courses",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/instructor/courses"
+                        }
+                    }
+                },
+                {
+                    "name": "Get Instructor Profile",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/instructor/profile"
+                        }
+                    }
+                },
+                {
+                    "name": "Update Profile",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"bio\": \"Updated bio\",\n  \"expertise\": \"Web Development\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/instructor/profile"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "3. Courses",
+            "item": [
+                {
+                    "name": "List All Courses",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/courses"
+                        }
+                    }
+                },
+                {
+                    "name": "Get Course Details",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/courses/{{courseId}}"
+                        }
+                    }
+                },
+                {
+                    "name": "Purchase Course",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"accountNumber\": \"{{accountNumber}}\",\n  \"secret\": \"password123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/courses/{{courseId}}/purchase"
+                        }
+                    }
+                },
+                {
+                    "name": "Access Course Content",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/courses/{{courseId}}/content"
+                        }
+                    }
+                },
+                {
+                    "name": "Complete Course",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/courses/{{courseId}}/complete"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "4. Learner",
+            "item": [
+                {
+                    "name": "Get Home Data",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/learner/home"
+                        }
+                    }
+                },
+                {
+                    "name": "Setup Bank Info",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"accountNumber\": \"{{accountNumber}}\",\n  \"secret\": \"my_secure_secret\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/learner/bank-setup"
+                        }
+                    }
+                },
+                {
+                    "name": "Get Enrolled Courses",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/learner/enrolled-courses"
+                        }
+                    }
+                },
+                {
+                    "name": "Get Certificates",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/learner/certificates"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "5. Bank",
+            "item": [
+                {
+                    "name": "Get Balance",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/bank/balance"
+                        }
+                    }
+                },
+                {
+                    "name": "Get Transaction History",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/bank/transactions"
+                        }
+                    }
+                },
+                {
+                    "name": "Get Org Balance",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/bank/org-balance"
+                        }
+                    }
+                },
+                {
+                    "name": "Validate Transaction",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"accountNumber\": \"{{accountNumber}}\",\n  \"secret\": \"password123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/bank/transactions/TRANSACTION_ID/validate"
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}

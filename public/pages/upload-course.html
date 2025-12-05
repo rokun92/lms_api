@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Course - LMS</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: var(--bg-darker);
+        }
+
+        .page-header {
+            background: var(--bg-light);
+            border-bottom: 1px solid var(--border);
+            padding: var(--spacing-xl) 0;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+        }
+
+        .content-type-selector {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .type-option {
+            padding: var(--spacing-md);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            text-align: center;
+            transition: all var(--transition-base);
+        }
+
+        .type-option:hover {
+            border-color: var(--primary);
+        }
+
+        .type-option.selected {
+            border-color: var(--primary);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .type-icon {
+            font-size: 2rem;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .content-fields {
+            display: none;
+        }
+
+        .content-fields.show {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="navbar-container"></div>
+
+    <div class="page-header">
+        <div class="container">
+            <h1>Upload New Course</h1>
+            <p class="text-muted mb-0">Create and publish your course</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="form-container">
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label class="form-label">Course Title</label>
+                    <input type="text" name="title" class="form-input" placeholder="e.g., Introduction to JavaScript"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea name="description" class="form-textarea" placeholder="Describe your course..."
+                        required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Price (USD)</label>
+                    <input type="number" name="price" class="form-input" placeholder="100" min="0" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Content Type</label>
+                    <div class="content-type-selector">
+                        <div class="type-option" onclick="selectContentType('text')">
+                            <div class="type-icon">📝</div>
+                            <div>Text</div>
+                        </div>
+                        <div class="type-option" onclick="selectContentType('video')">
+                            <div class="type-icon">🎥</div>
+                            <div>Video</div>
+                        </div>
+                        <div class="type-option" onclick="selectContentType('audio')">
+                            <div class="type-icon">🎵</div>
+                            <div>Audio</div>
+                        </div>
+                        <div class="type-option" onclick="selectContentType('mcq')">
+                            <div class="type-icon">❓</div>
+                            <div>Quiz</div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="contentType" id="contentType" required>
+                </div>
+
+                <div id="textFields" class="content-fields">
+                    <div class="form-group">
+                        <label class="form-label">Course Content</label>
+                        <textarea name="textContent" class="form-textarea" style="min-height: 200px;"
+                            placeholder="Write your course content here..."></textarea>
+                    </div>
+                </div>
+
+                <div id="mediaFields" class="content-fields">
+                    <div class="form-group">
+                        <label class="form-label">Upload File</label>
+                        <input type="file" name="file" class="form-input" accept="video/*,audio/*">
+                        <span class="form-help">Max file size: 100MB</span>
+                    </div>
+                </div>
+
+                <div id="mcqFields" class="content-fields">
+                    <div class="form-group">
+                        <label class="form-label">Quiz Questions (JSON format)</label>
+                        <textarea name="mcqContent" class="form-textarea" style="min-height: 200px;"
+                            placeholder='[{"question": "What is JavaScript?", "options": ["A language", "A framework", "A library"], "correctAnswer": 0}]'></textarea>
+                        <span class="form-help">Format: Array of {question, options, correctAnswer}</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    Upload Course
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/utils.js"></script>
+    <script>
+        if (!auth.requireAuth('instructor')) { }
+        initPage('instructor');
+
+        let selectedType = null;
+
+        function selectContentType(type) {
+            selectedType = type;
+            document.getElementById('contentType').value = type;
+
+            document.querySelectorAll('.type-option').forEach(el => el.classList.remove('selected'));
+            event.target.closest('.type-option').classList.add('selected');
+
+            document.querySelectorAll('.content-fields').forEach(el => el.classList.remove('show'));
+
+            if (type === 'text') {
+                document.getElementById('textFields').classList.add('show');
+            } else if (type === 'video' || type === 'audio') {
+                document.getElementById('mediaFields').classList.add('show');
+            } else if (type === 'mcq') {
+                document.getElementById('mcqFields').classList.add('show');
+            }
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!selectedType) {
+                showToast('Please select a content type', 'warning');
+                return;
+            }
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+
+            try {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Uploading...';
+                showLoading();
+
+                const formData = new FormData(e.target);
+
+                // Handle MCQ content
+                if (selectedType === 'mcq') {
+                    const mcqText = formData.get('mcqContent');
+                    try {
+                        const mcqData = JSON.parse(mcqText);
+                        formData.delete('mcqContent');
+                        formData.append('mcqContent', JSON.stringify(mcqData));
+                    } catch (err) {
+                        throw new Error('Invalid JSON format for quiz questions');
+                    }
+                }
+
+                const response = await api.uploadCourse(formData);
+
+                hideLoading();
+                showToast('Course uploaded successfully!', 'success');
+
+                // Show transaction info if present
+                if (response.transaction) {
+                    showToast(`Payment transaction created: ${response.transaction.transactionId}`, 'info');
+                }
+
+                setTimeout(() => {
+                    window.location.href = '/pages/instructor-courses.html';
+                }, 2000);
+
+            } catch (error) {
+                hideLoading();
+                showToast(error.message || 'Failed to upload course', 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        });
+    </script>
+</body>
+
+</html>

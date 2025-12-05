@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Success - LMS</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .success-container {
+            max-width: 600px;
+            margin: 100px auto;
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: #10b981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 40px;
+            color: white;
+        }
+
+        .success-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 12px;
+        }
+
+        .success-message {
+            font-size: 16px;
+            color: #6b7280;
+            margin-bottom: 30px;
+        }
+
+        .course-info {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .course-info h3 {
+            margin: 0 0 10px 0;
+            color: #1f2937;
+        }
+
+        .course-info p {
+            margin: 5px 0;
+            color: #6b7280;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #1f2937;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="success-container" id="content">
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Verifying your payment...</p>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script>
+        async function verifyPayment() {
+            try {
+                // Get session ID from URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const sessionId = urlParams.get('session_id');
+
+                if (!sessionId) {
+                    showError('No payment session found');
+                    return;
+                }
+
+                // Verify payment with backend
+                const response = await fetch(`/api/payment/verify/${sessionId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showSuccess(data.data);
+                } else {
+                    showError(data.message || 'Payment verification failed');
+                }
+            } catch (error) {
+                console.error('Error verifying payment:', error);
+                showError('Failed to verify payment. Please contact support.');
+            }
+        }
+
+        function showSuccess(paymentData) {
+            const { enrollment, amount, currency, paymentStatus } = paymentData;
+            const course = enrollment?.course;
+
+            document.getElementById('content').innerHTML = `
+                <div class="success-icon">✓</div>
+                <h1 class="success-title">Payment Successful!</h1>
+                <p class="success-message">
+                    Thank you for your purchase. You now have access to the course.
+                </p>
+
+                ${course ? `
+                <div class="course-info">
+                    <h3>${course.title}</h3>
+                    <p><strong>Amount Paid:</strong> $${amount.toFixed(2)} ${currency?.toUpperCase() || 'USD'}</p>
+                    <p><strong>Status:</strong> ${paymentStatus}</p>
+                </div>
+                ` : ''}
+
+                <div class="action-buttons">
+                    <a href="/pages/course-detail.html?id=${course?.id}" class="btn btn-primary">
+                        Start Learning
+                    </a>
+                    <a href="/pages/learner-dashboard.html" class="btn btn-secondary">
+                        Go to Dashboard
+                    </a>
+                </div>
+            `;
+        }
+
+        function showError(message) {
+            document.getElementById('content').innerHTML = `
+                <div class="success-icon" style="background: #ef4444;">✗</div>
+                <h1 class="success-title">Payment Verification Failed</h1>
+                <p class="success-message">${message}</p>
+                <div class="action-buttons">
+                    <a href="/pages/learner-dashboard.html" class="btn btn-secondary">
+                        Back to Dashboard
+                    </a>
+                </div>
+            `;
+        }
+
+        // Verify payment on page load
+        verifyPayment();
+    </script>
+</body>
+
+</html>

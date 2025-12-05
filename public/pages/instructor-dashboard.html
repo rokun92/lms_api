@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instructor Dashboard - LMS</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: var(--bg-darker);
+        }
+
+        .dashboard-header {
+            background: var(--gradient-primary);
+            padding: var(--spacing-2xl) 0;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .welcome-section h1 {
+            color: white;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .welcome-section p {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .stat-card {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-lg);
+        }
+
+        .stat-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .action-card {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            text-decoration: none;
+            display: block;
+        }
+
+        .action-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .action-icon {
+            font-size: 2.5rem;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .recent-section {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+
+        .transaction-info h4 {
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .transaction-amount {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-completed {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="navbar-container"></div>
+
+    <div class="dashboard-header">
+        <div class="container welcome-section">
+            <h1 id="welcomeText">Welcome back!</h1>
+            <p>Manage your courses and track your earnings</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Stats Row -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-value" id="totalCourses">0</div>
+                        <div class="stat-label">Total Courses</div>
+                    </div>
+                    <div class="stat-icon">📚</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-value" id="totalEarnings">$0</div>
+                        <div class="stat-label">Total Earnings</div>
+                    </div>
+                    <div class="stat-icon">💰</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-value" id="totalTransactions">0</div>
+                        <div class="stat-label">Total Sales</div>
+                    </div>
+                    <div class="stat-icon">🛒</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <h2>Quick Actions</h2>
+        <div class="quick-actions">
+            <a href="/pages/upload-course.html" class="action-card">
+                <div class="action-icon">➕</div>
+                <h3>Upload Course</h3>
+                <p class="text-muted mb-0">Create a new course</p>
+            </a>
+
+            <a href="/pages/instructor-courses.html" class="action-card">
+                <div class="action-icon">📋</div>
+                <h3>My Courses</h3>
+                <p class="text-muted mb-0">View all courses</p>
+            </a>
+
+            <a href="#" onclick="loadTransactions(); return false;" class="action-card">
+                <div class="action-icon">💳</div>
+                <h3>Transactions</h3>
+                <p class="text-muted mb-0">View payment history</p>
+            </a>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="recent-section">
+            <div class="section-header">
+                <h2 class="mb-0">Recent Transactions</h2>
+            </div>
+            <div id="transactionsList">
+                <p class="text-center text-muted">Loading transactions...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Validation Modal -->
+    <div id="validationModal" class="loading-overlay" style="display: none;">
+        <div class="card" style="width: 90%; max-width: 500px; position: relative;">
+            <button onclick="closeValidateModal()" class="btn btn-outline btn-sm"
+                style="position: absolute; top: 1rem; right: 1rem; border: none;">✕</button>
+            <h3 class="mb-3">Validate Transaction</h3>
+            <p class="text-muted">Please enter your bank credentials to accept this payment.</p>
+
+            <form id="validationForm" onsubmit="handleValidation(event)">
+                <input type="hidden" id="validateTransactionId">
+
+                <div class="form-group mb-3">
+                    <label class="form-label">Account Number</label>
+                    <input type="text" id="validateAccountNumber" class="form-input" required>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label class="form-label">Bank Secret</label>
+                    <input type="password" id="validateSecret" class="form-input" required>
+                </div>
+
+                <div class="flex-between gap-2">
+                    <button type="button" class="btn btn-secondary" onclick="closeValidateModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Validate Payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/utils.js"></script>
+    <script>
+        // Protect page - require instructor role
+        if (!auth.requireAuth('instructor')) {
+            // Will redirect if not authenticated or wrong role
+        }
+
+        // Initialize page
+        initPage('instructor');
+
+        let currentProfile = null;
+
+        // Load dashboard data
+        async function loadDashboard() {
+            try {
+                showLoading();
+
+                // Get user profile
+                const user = auth.getCurrentUser();
+                document.getElementById('welcomeText').textContent = `Welcome back, ${user.name}!`;
+
+                // Get instructor profile (includes bank info)
+                const profileResponse = await api.getInstructorProfile();
+                currentProfile = profileResponse.data?.user || {};
+
+                // Get courses
+                const coursesResponse = await api.getInstructorCourses();
+                const courses = coursesResponse.data?.courses || [];
+
+                // Get instructor earnings from course sales
+                let totalEarnings = 0;
+                let transactionCount = 0;
+                let transactions = [];
+
+                try {
+                    const earningsResponse = await api.getInstructorEarnings();
+                    totalEarnings = parseFloat(earningsResponse.data?.totalEarnings || 0);
+                    transactionCount = earningsResponse.data?.transactionCount || 0;
+                    transactions = earningsResponse.data?.transactions || [];
+                } catch (e) {
+                    console.log('No earnings yet or earnings endpoint not available');
+                    // Fallback to regular transactions
+                    const transactionsResponse = await api.getTransactions();
+                    transactions = transactionsResponse.data?.transactions || [];
+                    // Calculate earnings from completed transactions
+                    totalEarnings = transactions
+                        .filter(t => t.status === 'completed')
+                        .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+                    transactionCount = transactions.filter(t => t.status === 'completed').length;
+                }
+
+                // Update stats
+                document.getElementById('totalCourses').textContent = courses.length;
+                document.getElementById('totalEarnings').textContent = formatCurrency(totalEarnings);
+                document.getElementById('totalTransactions').textContent = transactionCount;
+
+                // Display recent transactions
+                displayTransactions(transactions.slice(0, 5));
+
+                hideLoading();
+            } catch (error) {
+                hideLoading();
+                showToast('Failed to load dashboard data', 'error');
+                console.error(error);
+            }
+        }
+
+        function displayTransactions(transactions) {
+            const container = document.getElementById('transactionsList');
+
+            if (transactions.length === 0) {
+                container.innerHTML = '<p class="text-center text-muted">No transactions yet. When students purchase your courses, they will appear here.</p>';
+                return;
+            }
+
+            container.innerHTML = transactions.map(t => `
+                <div class="transaction-item">
+                    <div class="transaction-info">
+                        <h4>${t.courseName || t.description || 'Course Purchase'}</h4>
+                        <p class="text-muted mb-0">
+                            ${formatDate(t.date || t.createdAt)} • 
+                            <span class="status-badge status-${t.status}">${t.status}</span>
+                        </p>
+                    </div>
+                    <div class="transaction-amount" style="color: var(--success); font-weight: 600;">
+                        +${formatCurrency(t.amount)}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadTransactions() {
+            try {
+                showLoading();
+                const response = await api.getInstructorEarnings();
+                hideLoading();
+                displayTransactions(response.data?.transactions || []);
+                showToast('Transactions refreshed', 'success');
+            } catch (error) {
+                hideLoading();
+                showToast('Failed to load transactions', 'error');
+            }
+        }
+
+        function openValidateModal(transactionId) {
+            document.getElementById('validateTransactionId').value = transactionId;
+            // Pre-fill account number if available
+            if (currentProfile && currentProfile.bankAccount) {
+                document.getElementById('validateAccountNumber').value = currentProfile.bankAccount.accountNumber;
+            }
+            document.getElementById('validationModal').style.display = 'flex';
+        }
+
+        function closeValidateModal() {
+            document.getElementById('validationModal').style.display = 'none';
+            document.getElementById('validationForm').reset();
+        }
+
+        async function handleValidation(event) {
+            event.preventDefault();
+
+            const transactionId = document.getElementById('validateTransactionId').value;
+            const accountNumber = document.getElementById('validateAccountNumber').value;
+            const secret = document.getElementById('validateSecret').value;
+
+            try {
+                showLoading();
+                await api.validateTransaction(transactionId, accountNumber, secret);
+                hideLoading();
+
+                closeValidateModal();
+                showToast('Transaction validated successfully!', 'success');
+
+                // Refresh dashboard
+                loadDashboard();
+            } catch (error) {
+                hideLoading();
+                showToast(error.message || 'Validation failed', 'error');
+            }
+        }
+
+        // Load dashboard on page load
+        loadDashboard();
+    </script>
+</body>
+
+</html>

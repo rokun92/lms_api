@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Courses - LMS</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: var(--bg-darker);
+        }
+
+        .page-header {
+            background: var(--bg-light);
+            border-bottom: 1px solid var(--border);
+            padding: var(--spacing-xl) 0;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .course-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        .course-card {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            transition: all var(--transition-base);
+        }
+
+        .course-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .course-image {
+            height: 180px;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+        }
+
+        .course-content {
+            padding: var(--spacing-lg);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-dark);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            margin: var(--spacing-md) 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-primary);
+            transition: width var(--transition-slow);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="navbar-container"></div>
+
+    <div class="page-header">
+        <div class="container">
+            <h1>My Enrolled Courses</h1>
+            <p class="text-muted mb-0">Continue your learning journey</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="enrolledCourses" class="course-grid">
+            <p class="text-muted">Loading courses...</p>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/utils.js"></script>
+    <script>
+        if (!auth.requireAuth('learner')) { }
+        initPage('learner');
+
+        async function loadMyCourses() {
+            try {
+                showLoading();
+                const response = await api.getEnrolledCourses();
+                const enrollments = response.data?.enrollments || [];
+
+                displayEnrolledCourses(enrollments);
+                hideLoading();
+            } catch (error) {
+                hideLoading();
+                showToast('Failed to load courses', 'error');
+            }
+        }
+
+        function displayEnrolledCourses(enrollments) {
+            const container = document.getElementById('enrolledCourses');
+
+            if (enrollments.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 3rem;">
+                        <h3>No courses yet</h3>
+                        <p class="text-muted mb-3">You haven't enrolled in any courses yet.</p>
+                        <a href="/pages/courses.html" class="btn btn-primary">Browse Courses</a>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = enrollments.map(enrollment => {
+                const course = enrollment.course;
+                return `
+                    <div class="course-card">
+                        <div class="course-image">${getContentTypeIcon(course.contentType)}</div>
+                        <div class="course-content">
+                            <h3>${course.title}</h3>
+                            <p class="text-muted">${truncate(course.description, 80)}</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${enrollment.progress}%"></div>
+                            </div>
+                            <div class="flex-between">
+                                <small class="text-muted">${enrollment.progress}% Complete</small>
+                                ${enrollment.completed
+                        ? '<span class="text-success">✓ Completed</span>'
+                        : ''
+                    }
+                            </div>
+                            <div class="mt-3">
+                                <a href="/pages/course-detail.html?id=${course.id}" class="btn btn-primary" style="width: 100%;">
+                                    ${enrollment.completed ? 'Review Course' : 'Continue Learning'}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        loadMyCourses();
+    </script>
+</body>
+
+</html>
