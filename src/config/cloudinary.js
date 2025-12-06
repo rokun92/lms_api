@@ -15,7 +15,7 @@ const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
         folder: 'lms-courses',
-        resource_type: 'auto'
+        resource_type: 'raw' 
     }
 });
 
