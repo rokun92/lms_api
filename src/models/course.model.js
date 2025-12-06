@@ -16,7 +16,7 @@ const Course = sequelize.define('Course', {
         allowNull: false
     },
     contentType: {
-        type: DataTypes.ENUM('text', 'video', 'audio', 'mcq'),
+        type: DataTypes.ENUM('text', 'video', 'audio'),
         allowNull: false
     },
     // For text content

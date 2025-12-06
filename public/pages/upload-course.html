@@ -113,10 +113,6 @@
                             <div class="type-icon">🎵</div>
                             <div>Audio</div>
                         </div>
-                        <div class="type-option" onclick="selectContentType('mcq')">
-                            <div class="type-icon">❓</div>
-                            <div>Quiz</div>
-                        </div>
                     </div>
                     <input type="hidden" name="contentType" id="contentType" required>
                 </div>
@@ -134,15 +130,6 @@
                         <label class="form-label">Upload File</label>
                         <input type="file" name="file" class="form-input" accept="video/*,audio/*">
                         <span class="form-help">Max file size: 100MB</span>
-                    </div>
-                </div>
-
-                <div id="mcqFields" class="content-fields">
-                    <div class="form-group">
-                        <label class="form-label">Quiz Questions (JSON format)</label>
-                        <textarea name="mcqContent" class="form-textarea" style="min-height: 200px;"
-                            placeholder='[{"question": "What is JavaScript?", "options": ["A language", "A framework", "A library"], "correctAnswer": 0}]'></textarea>
-                        <span class="form-help">Format: Array of {question, options, correctAnswer}</span>
                     </div>
                 </div>
 
@@ -175,9 +162,7 @@
                 document.getElementById('textFields').classList.add('show');
             } else if (type === 'video' || type === 'audio') {
                 document.getElementById('mediaFields').classList.add('show');
-            } else if (type === 'mcq') {
-                document.getElementById('mcqFields').classList.add('show');
-            }
+            } 
         }
 
         document.getElementById('uploadForm').addEventListener('submit', async (e) => {
@@ -197,18 +182,6 @@
                 showLoading();
 
                 const formData = new FormData(e.target);
-
-                // Handle MCQ content
-                if (selectedType === 'mcq') {
-                    const mcqText = formData.get('mcqContent');
-                    try {
-                        const mcqData = JSON.parse(mcqText);
-                        formData.delete('mcqContent');
-                        formData.append('mcqContent', JSON.stringify(mcqData));
-                    } catch (err) {
-                        throw new Error('Invalid JSON format for quiz questions');
-                    }
-                }
 
                 const response = await api.uploadCourse(formData);
 
