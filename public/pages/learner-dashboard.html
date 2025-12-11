@@ -6,93 +6,133 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Learner Dashboard - LMS</title>
     <link rel="stylesheet" href="/css/main.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            background: var(--bg-darker);
+        .dashboard-header {
+            background: var(--gradient-cosmic);
+            padding: var(--space-3xl) 0;
+            margin-bottom: var(--space-2xl);
+            position: relative;
+            overflow: hidden;
         }
 
-        .dashboard-header {
-            background: var(--gradient-primary);
-            padding: var(--spacing-2xl) 0;
-            margin-bottom: var(--spacing-xl);
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 245, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .welcome-section {
+            position: relative;
+            z-index: 1;
         }
 
         .welcome-section h1 {
             color: white;
-            margin-bottom: var(--spacing-sm);
+            margin-bottom: var(--space-sm);
+            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.3));
         }
 
         .welcome-section p {
             color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
         }
 
         .stats-row {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: var(--spacing-lg);
-            margin-bottom: var(--spacing-xl);
+            gap: var(--space-xl);
+            margin-bottom: var(--space-2xl);
         }
 
         .stat-card {
-            background: var(--bg-light);
-            border: 1px solid var(--border);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--glass-border);
             border-radius: var(--radius-xl);
-            padding: var(--spacing-lg);
+            padding: var(--space-xl);
             text-align: center;
+            transition: all var(--transition-base);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--neon-cyan);
+            box-shadow: 0 10px 30px rgba(0, 245, 255, 0.2);
         }
 
         .stat-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--primary);
+            font-size: 3rem;
+            font-weight: 800;
+            background: var(--gradient-neon);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 20px rgba(0, 245, 255, 0.3));
         }
 
         .course-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: var(--spacing-lg);
+            gap: var(--space-xl);
         }
 
         .course-card {
-            background: var(--bg-light);
-            border: 1px solid var(--border);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--glass-border);
             border-radius: var(--radius-xl);
             overflow: hidden;
             transition: all var(--transition-base);
         }
 
         .course-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--primary);
-            box-shadow: var(--shadow-xl);
+            transform: translateY(-8px);
+            border-color: var(--neon-cyan);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), var(--glow-multi);
         }
 
         .course-image {
             height: 180px;
-            background: var(--gradient-primary);
+            background: var(--gradient-cosmic);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 4rem;
+            filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.5));
         }
 
         .course-content {
-            padding: var(--spacing-lg);
+            padding: var(--space-xl);
         }
 
         .progress-bar {
             height: 8px;
-            background: var(--bg-dark);
-            border-radius: var(--radius-sm);
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-full);
             overflow: hidden;
-            margin: var(--spacing-md) 0;
+            margin: var(--space-md) 0;
         }
 
         .progress-fill {
             height: 100%;
-            background: var(--gradient-primary);
+            background: var(--gradient-neon);
             transition: width var(--transition-slow);
+            box-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
         }
     </style>
 </head>

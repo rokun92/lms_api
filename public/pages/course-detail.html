@@ -6,41 +6,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Course Details - LMS</title>
     <link rel="stylesheet" href="/css/main.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            background: var(--bg-darker);
+        .course-hero {
+            background: var(--gradient-cosmic);
+            padding: var(--space-3xl) 0;
+            margin-bottom: var(--space-2xl);
+            position: relative;
+            overflow: hidden;
         }
 
-        .course-hero {
-            background: var(--gradient-primary);
-            padding: var(--spacing-2xl) 0;
-            margin-bottom: var(--spacing-xl);
+        .course-hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(181, 55, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
         }
 
         .course-hero h1 {
             color: white;
+            font-size: 3rem;
+            margin-bottom: var(--space-md);
+            filter: drop-shadow(0 0 20px rgba(0, 0, 0, 0.3));
+            position: relative;
+            z-index: 1;
         }
 
         .course-hero p {
             color: rgba(255, 255, 255, 0.9);
+            font-size: 1.25rem;
+            position: relative;
+            z-index: 1;
         }
 
         .content-section {
-            background: var(--bg-light);
-            border: 1px solid var(--border);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--glass-border);
             border-radius: var(--radius-xl);
-            padding: var(--spacing-xl);
-            margin-bottom: var(--spacing-lg);
+            padding: var(--space-2xl);
+            margin-bottom: var(--space-xl);
+            color: var(--text-bright);
+        }
+
+        .content-section h2 {
+            color: var(--neon-cyan);
+            margin-bottom: var(--space-lg);
+            font-size: 1.75rem;
         }
 
         .purchase-card {
             position: sticky;
-            top: var(--spacing-lg);
-            background: var(--bg-light);
-            border: 1px solid var(--border);
+            top: var(--space-lg);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--glass-border);
             border-radius: var(--radius-xl);
-            padding: var(--spacing-xl);
+            padding: var(--space-xl);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .modal {
@@ -50,8 +89,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(4px);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
             z-index: 1000;
             align-items: center;
             justify-content: center;
@@ -69,32 +108,26 @@
         }
 
         .modal-content {
-            background: var(--bg-light);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--glass-border);
             border-radius: var(--radius-xl);
-            padding: var(--spacing-2xl);
+            padding: var(--space-2xl);
             max-width: 500px;
             width: 90%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
             animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(30px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
         }
 
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: var(--spacing-xl);
+            margin-bottom: var(--space-xl);
+        }
+
+        .modal-header h3 {
+            color: var(--text-bright);
         }
 
         .modal-close {
@@ -102,59 +135,75 @@
             border: none;
             font-size: 1.5rem;
             cursor: pointer;
-            color: var(--text-secondary);
+            color: var(--text-medium);
             transition: color 0.2s;
         }
 
         .modal-close:hover {
-            color: var(--text-primary);
+            color: var(--neon-pink);
         }
 
         .form-group {
-            margin-bottom: var(--spacing-lg);
+            margin-bottom: var(--space-lg);
         }
 
         .form-group label {
             display: block;
-            margin-bottom: var(--spacing-sm);
+            margin-bottom: var(--space-sm);
             font-weight: 500;
-            color: var(--text-primary);
+            color: var(--text-bright);
         }
 
         .form-group input[type="text"],
         .form-group input[type="password"] {
             width: 100%;
-            padding: var(--spacing-md);
-            border: 1px solid var(--border);
+            padding: var(--space-md);
+            border: 1px solid var(--glass-border);
             border-radius: var(--radius-md);
-            background: var(--bg-darker);
-            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-bright);
             font-size: 1rem;
-            transition: border-color 0.2s;
+            transition: all var(--transition-base);
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: var(--primary);
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 10px rgba(0, 245, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .checkbox-group {
             display: flex;
             align-items: center;
-            gap: var(--spacing-sm);
-            margin-bottom: var(--spacing-lg);
+            gap: var(--space-sm);
+            margin-bottom: var(--space-lg);
         }
 
         .checkbox-group input[type="checkbox"] {
             width: 18px;
             height: 18px;
             cursor: pointer;
+            accent-color: var(--neon-cyan);
         }
 
         .checkbox-group label {
             margin: 0;
             cursor: pointer;
             user-select: none;
+            color: var(--text-medium);
+        }
+
+        /* Quiz Styles */
+        input[type="radio"] {
+            accent-color: var(--neon-cyan);
+            width: 18px;
+            height: 18px;
+        }
+
+        #courseContent h4 {
+            color: var(--text-bright);
+            margin-bottom: var(--space-md);
         }
     </style>
 </head>
@@ -307,24 +356,7 @@
                 <button onclick="completeCourse()" class="btn btn-success" style="width: 100%; max-width: 300px;">Mark as Complete</button>
             `;
             contentDiv.appendChild(completeBtnContainer);
-        }
-
-        function displayQuiz(questions) {
-            const contentDiv = document.getElementById('courseContent');
-            contentDiv.innerHTML = questions.map((q, i) => `
-                <div style="margin-bottom: var(--spacing-lg);">
-                    <h4>Question ${i + 1}: ${q.question}</h4>
-                    ${q.options.map((opt, j) => `
-                        <div style="margin: var(--spacing-sm) 0;">
-                            <label style="display: flex; align-items: center; gap: var(--spacing-sm);">
-                                <input type="radio" name="q${i}" value="${j}">
-                                <span>${opt}</span>
-                            </label>
-                        </div>
-                    `).join('')}
-                </div>
-            `).join('');
-        }
+        }   
 
         async function enrollFree() {
             // For free courses, no bank credentials needed
