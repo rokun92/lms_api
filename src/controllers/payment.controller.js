@@ -66,7 +66,7 @@ const createCheckoutSession = async (req, res, next) => {
             line_items: [
                 {
                     price_data: {
-                        currency: 'usd',
+                        currency: 'bdt',
                         product_data: {
                             name: course.title,
                             description: course.description || 'Online Course',
@@ -136,7 +136,7 @@ const handleWebhook = async (req, res) => {
             const instructorId = session.metadata.instructorId;
             const amount = session.amount_total / 100; // Convert from cents
 
-            console.log(`Payment completed: User ${userId} purchased Course ${courseId} for $${amount}`);
+            console.log(`Payment completed: User ${userId} purchased Course ${courseId} for ৳${amount}`);
 
             // Create enrollment
             const enrollment = await Enrollment.create({
@@ -165,7 +165,7 @@ const handleWebhook = async (req, res) => {
 
             // Update instructor's earnings (you can track this separately)
             // For now, we'll just log it
-            console.log(`Instructor ${instructorId} earned $${amount} from course sale`);
+            console.log(`Instructor ${instructorId} earned ৳${amount} from course sale`);
 
             console.log('Enrollment and transaction created successfully');
         } catch (error) {
@@ -260,7 +260,7 @@ const verifyPayment = async (req, res, next) => {
                         instructorId
                     }
                 });
-                console.log(`Transaction created for course purchase: $${amount}`);
+                console.log(`Transaction created for course purchase: ৳${amount}`);
             }
         }
 

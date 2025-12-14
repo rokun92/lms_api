@@ -120,7 +120,7 @@ const getBalance = async (req, res, next) => {
             success: true,
             data: {
                 balance: balance.toFixed(2),
-                currency: 'USD'
+                currency: 'BDT'
             }
         });
     } catch (error) {
@@ -228,7 +228,7 @@ const getOrgBalance = async (req, res, next) => {
             success: true,
             data: {
                 balance: totalBalance.toFixed(2),
-                currency: 'USD',
+                currency: 'BDT',
                 transactionCount: transactions.length
             }
         });

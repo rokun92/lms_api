@@ -56,7 +56,6 @@ const swaggerSpecs = require('./config/swagger');
 // API Documentation
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
-
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/instructor', instructorRoutes);
