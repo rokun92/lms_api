@@ -104,14 +104,6 @@ class APIClient {
         });
     }
 
-    // Learner endpoints
-    // async setupBank(accountNumber, secret) {
-    //     return this.request('/learner/bank-setup', {
-    //         method: 'POST',
-    //         body: { accountNumber, secret },
-    //     });
-    // }
-
     async getLearnerHome() {
         return this.request('/learner/home');
     }
@@ -160,15 +152,6 @@ class APIClient {
             method: 'POST',
         });
     }
-
-    // Bank endpoints
-    // async getBalance() {
-    //     return this.request('/bank/balance');
-    // }
-
-    // async getTransactions() {
-    //     return this.request('/bank/transactions');
-    // }
 
     async getInstructorEarnings() {
         return this.request('/payment/instructor/earnings');
