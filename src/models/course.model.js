@@ -1,5 +1,14 @@
+/**
+ * Course Model
+ * 
+ * Represents a course in the LMS system.
+ * Courses can contain text, video, or audio content and are created by instructors.
+ * Exams are managed separately through the Question model.
+ */
+
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
+const { CONTENT_TYPES, COURSE_STATUS, DEFAULT_COURSE_PRICE, DEFAULT_PASSING_SCORE } = require('../constants');
 
 const Course = sequelize.define('Course', {
     id: {
@@ -16,15 +25,15 @@ const Course = sequelize.define('Course', {
         allowNull: false
     },
     contentType: {
-        type: DataTypes.ENUM('text', 'video', 'audio'),
+        type: DataTypes.ENUM(Object.values(CONTENT_TYPES)),
         allowNull: false
     },
-    // For text content
+    // For text-based courses
     textContent: {
         type: DataTypes.TEXT,
         allowNull: true
     },
-    // For uploaded files (video/audio) - Cloudinary URL
+    // For video/audio courses - Cloudinary URL
     fileUrl: {
         type: DataTypes.STRING,
         allowNull: true
@@ -33,19 +42,14 @@ const Course = sequelize.define('Course', {
         type: DataTypes.STRING,
         allowNull: true
     },
-    // For MCQ content (stored as JSON)
-    mcqContent: {
-        type: DataTypes.JSONB,
-        allowNull: true
-    },
     price: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
-        defaultValue: process.env.COURSE_PRICE || 100
+        defaultValue: process.env.COURSE_PRICE || DEFAULT_COURSE_PRICE
     },
     status: {
-        type: DataTypes.ENUM('active', 'inactive'),
-        defaultValue: 'active'
+        type: DataTypes.ENUM(Object.values(COURSE_STATUS)),
+        defaultValue: COURSE_STATUS.ACTIVE
     },
     thumbnail: {
         type: DataTypes.STRING,
@@ -59,24 +63,32 @@ const Course = sequelize.define('Course', {
             key: 'id'
         }
     },
-    // Duration of video/audio content in seconds
+    // Duration tracking for video/audio content
     contentDurationSeconds: {
         type: DataTypes.INTEGER,
         allowNull: true
     },
-    // Required reading time for text content (in minutes)
+    // Reading time tracking for text content
     requiredReadingMinutes: {
         type: DataTypes.INTEGER,
         defaultValue: 0
     },
-    // Passing score for exam (percentage)
+    // Exam configuration
     passingScore: {
         type: DataTypes.INTEGER,
-        defaultValue: 70
+        defaultValue: DEFAULT_PASSING_SCORE
     }
 }, {
     tableName: 'courses',
-    timestamps: true
+    timestamps: true,
+    indexes: [
+        {
+            fields: ['instructorId']
+        },
+        {
+            fields: ['status']
+        }
+    ]
 });
 
 module.exports = Course;

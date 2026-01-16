@@ -4,8 +4,7 @@ const {
     uploadCourse,
     getMyCourses,
     getProfile,
-    updateProfile,
-    getTransactionHistory
+    updateProfile
 } = require('../controllers/instructor.controller');
 const {
     addQuestion,
@@ -54,14 +53,12 @@ router.use(checkRole('instructor'));
  *                 type: string
  *               contentType:
  *                 type: string
- *                 enum: [text, video, audio, mcq]
+ *                 enum: [text, video, audio]
  *               textContent:
  *                 type: string
  *               file:
  *                 type: string
  *                 format: binary
- *               mcqContent:
- *                 type: string
  *               price:
  *                 type: number
  *     responses:
@@ -94,7 +91,7 @@ router.get('/courses', getMyCourses);
  * @swagger
  * /api/instructor/profile:
  *   get:
- *     summary: Get instructor profile with bank info
+ *     summary: Get instructor profile
  *     tags: [Instructor]
  *     security:
  *       - bearerAuth: []
@@ -134,22 +131,6 @@ router.get('/profile', getProfile);
  *         description: Unauthorized
  */
 router.put('/profile', updateProfile);
-
-/**
- * @swagger
- * /api/instructor/transactions:
- *   get:
- *     summary: Get instructor's transaction history
- *     tags: [Instructor]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: List of transactions
- *       401:
- *         description: Unauthorized
- */
-router.get('/transactions', getTransactionHistory);
 
 /**
  * @swagger
