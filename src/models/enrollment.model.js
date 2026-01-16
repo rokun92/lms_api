@@ -31,6 +31,37 @@ const Enrollment = sequelize.define('Enrollment', {
             max: 100
         }
     },
+    // Content progress (0-100%) - video/audio completion or reading time
+    contentProgress: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        validate: {
+            min: 0,
+            max: 100
+        }
+    },
+    contentCompletedAt: {
+        type: DataTypes.DATE,
+        allowNull: true
+    },
+    // Time spent on content (for text content tracking)
+    timeSpentSeconds: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0
+    },
+    // Exam status
+    examPassed: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
+    examScore: {
+        type: DataTypes.DECIMAL(5, 2),
+        allowNull: true
+    },
+    examAttemptCount: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0
+    },
     completed: {
         type: DataTypes.BOOLEAN,
         defaultValue: false

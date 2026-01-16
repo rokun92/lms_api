@@ -23,6 +23,11 @@ const connectDB = async () => {
   try {
     await sequelize.authenticate();
     console.log('✅ PostgreSQL Database connected successfully');
+
+    // Sync all models - use alter to add new columns to existing tables
+    await sequelize.sync({ alter: true });
+    console.log('✅ Database schema synchronized');
+
     return sequelize;
   } catch (error) {
     console.error('❌ Unable to connect to the database:', error.message);

@@ -115,6 +115,8 @@
             padding: var(--space-2xl);
             max-width: 500px;
             width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
             animation: slideUp 0.3s ease;
         }
@@ -205,6 +207,71 @@
             color: var(--text-bright);
             margin-bottom: var(--space-md);
         }
+
+        /* Exam Styles */
+        .exam-question {
+            margin-bottom: var(--space-xl);
+            padding-bottom: var(--space-lg);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .exam-question:last-child {
+            border-bottom: none;
+        }
+
+        .exam-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-sm);
+            padding: var(--space-sm);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .exam-option:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .exam-option input[type="radio"] {
+            margin: 0;
+        }
+
+        .result-score {
+            font-size: 3rem;
+            font-weight: 700;
+            text-align: center;
+            margin: var(--space-lg) 0;
+            color: var(--text-bright);
+        }
+
+        .score-pass {
+            color: var(--success);
+        }
+
+        .score-fail {
+            color: var(--danger);
+        }
+
+        /* Custom scrollbar for modal */
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: var(--neon-cyan);
+            border-radius: 4px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb:hover {
+            background: var(--neon-pink);
+        }
     </style>
 </head>
 
@@ -229,6 +296,23 @@
                 <div class="content-section" id="courseContentSection" style="display: none;">
                     <h2>Course Content</h2>
                     <div id="courseContent"></div>
+
+                    <!-- Progress & Exam Section -->
+                    <div id="progressSection"
+                        style="margin-top: var(--space-xl); padding-top: var(--space-lg); border-top: 1px solid var(--glass-border);">
+                        <h3>Your Progress</h3>
+                        <div
+                            style="background: rgba(255,255,255,0.05); height: 10px; border-radius: 5px; margin: var(--space-md) 0;">
+                            <div id="progressBar"
+                                style="height: 100%; width: 0%; background: var(--success); border-radius: 5px; transition: width 0.3s;">
+                            </div>
+                        </div>
+                        <p id="progressText" class="text-muted mb-4">0% Completed</p>
+
+                        <div id="examActionArea">
+                            <!-- Buttons will be injected here -->
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -245,9 +329,26 @@
                         <ul style="margin-left: var(--spacing-lg); color: var(--text-secondary);">
                             <li>Full lifetime access</li>
                             <li>Learn at your own pace</li>
+                            <li>Certificate of Completion</li>
                         </ul>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exam Modal -->
+    <div id="examModal" class="modal">
+        <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3>Final Exam</h3>
+                <button class="modal-close" onclick="closeExamModal()">&times;</button>
+            </div>
+            <div id="examBody">
+                <form id="examForm">
+                    <div id="examQuestions"></div>
+                    <button type="submit" class="btn btn-primary mt-4" style="width: 100%;">Submit Answers</button>
+                </form>
             </div>
         </div>
     </div>
@@ -270,6 +371,7 @@
 
         let courseData = null;
         let isEnrolled = false;
+        let examQuestions = [];
 
         async function loadCourse() {
             try {
@@ -279,7 +381,8 @@
                 const course = courseData;
 
                 document.getElementById('courseTitle').textContent = course.title;
-                document.getElementById('fullDescription').textContent = course.description;
+                document.getElementById('courseDescription').textContent = course.description || '';
+                document.getElementById('fullDescription').textContent = course.description || 'No description available.';
                 document.getElementById('coursePrice').textContent = formatCurrency(course.price);
 
                 // Check if enrolled
@@ -287,7 +390,8 @@
                     try {
                         const contentResponse = await api.getCourseContent(courseId);
                         isEnrolled = true;
-                        displayEnrolledView(course, contentResponse.data);
+                        displayEnrolledContent(course, contentResponse.data);
+                        updateProgressDisplay();
                     } catch (error) {
                         displayPurchaseView(course);
                     }
@@ -327,7 +431,7 @@
             }
         }
 
-        function displayEnrolledView(course, contentData) {
+        function displayEnrolledContent(course, contentData) {
             // Hide sidebar and expand main content
             document.getElementById('sidebarColumn').style.display = 'none';
             document.getElementById('mainContentColumn').style.gridColumn = '1 / -1';
@@ -338,28 +442,146 @@
 
             // Add content
             if (course.contentType === 'text') {
-                contentDiv.innerHTML = `<p>${contentData.course.textContent}</p>`;
+                contentDiv.innerHTML = `<div style="background: rgba(255,255,255,0.05); padding: var(--space-xl); border-radius: var(--radius-lg); white-space: pre-wrap;">${contentData.course.textContent}</div>`;
             } else if (course.contentType === 'video' || course.contentType === 'audio') {
                 contentDiv.innerHTML = `
-                    <${course.contentType} controls style="width: 100%; max-width: 100%;">
-                        <source src="${contentData.course.fileUrl}">
-                    </${course.contentType}>
+                     <div style="background: black; border-radius: var(--radius-lg); overflow: hidden;">
+                        <${course.contentType} controls style="width: 100%; max-width: 100%; display: block;">
+                            <source src="${contentData.course.fileUrl}">
+                        </${course.contentType}>
+                    </div>
                 `;
-            } else if (course.contentType === 'mcq') {
-                displayQuiz(contentData.course.mcqContent);
             }
 
-            // Add complete button at the bottom of content
-            const completeBtnContainer = document.createElement('div');
-            completeBtnContainer.className = 'mt-4';
-            completeBtnContainer.innerHTML = `
-                <button onclick="completeCourse()" class="btn btn-success" style="width: 100%; max-width: 300px;">Mark as Complete</button>
-            `;
-            contentDiv.appendChild(completeBtnContainer);
-        }   
+            // Start progress tracking
+            startProgressTracking(course);
+
+            // Initial progress check
+            updateProgressDisplay();
+        }
+
+        async function updateProgressDisplay() {
+            try {
+                const response = await api.getProgress(courseId);
+                const data = response.data;
+
+                // Update bar
+                const percent = Math.min(100, Math.round(data.contentProgress || 0));
+                document.getElementById('progressBar').style.width = `${percent}%`;
+                document.getElementById('progressText').textContent = `${percent}% Content Completed`;
+
+                const actionArea = document.getElementById('examActionArea');
+
+                if (data.canGetCertificate) {
+                    const scoreDisplay = data.examScore ? `<p class="mb-3">You Scored: <strong>${Number(data.examScore).toFixed(0)}%</strong></p>` : '';
+                    actionArea.innerHTML = `
+                        <div class="text-center">
+                            <h3 class="text-success mb-3">🎉 Course Completed!</h3>
+                            ${scoreDisplay}
+                            <button onclick="completeCourse()" class="btn btn-success">Download Certificate</button>
+                        </div>
+                    `;
+                } else if (data.canTakeExam) {
+                    if (data.hasQuestions) {
+                        actionArea.innerHTML = `
+                            <div class="text-center">
+                                <p class="mb-3">Content completed! You can now take the final exam.</p>
+                                <button onclick="openExamModal()" class="btn btn-primary">Take Final Exam</button>
+                            </div>
+                        `;
+                    } else {
+                        // No exam logic (just direct completion if 100%)
+                        actionArea.innerHTML = `
+                            <button onclick="completeCourse()" class="btn btn-success" style="width: 100%;">Mark as Complete</button>
+                        `;
+                    }
+                } else {
+                    actionArea.innerHTML = `
+                         <button class="btn btn-secondary" disabled style="width: 100%; opacity: 0.5;">Complete Content to Unlock Exam</button>
+                    `;
+                }
+            } catch (error) {
+                console.error('Failed to get progress', error);
+            }
+        }
+
+        let progressInterval;
+        let lastTime = Date.now();
+
+        function startProgressTracking(course) {
+            // Clear any existing interval
+            if (progressInterval) clearInterval(progressInterval);
+
+            // Handle text content progress
+            if (course.contentType === 'text') {
+                // Check if page is visible
+                let isPageVisible = !document.hidden;
+                document.addEventListener('visibilitychange', () => {
+                    isPageVisible = !document.hidden;
+                    if (isPageVisible) {
+                        lastTime = Date.now();
+                    }
+                });
+
+                progressInterval = setInterval(async () => {
+                    if (!isPageVisible) return;
+
+                    const now = Date.now();
+                    const diff = Math.floor((now - lastTime) / 1000);
+                    lastTime = now;
+
+                    if (diff > 0) {
+                        try {
+                            // Update progress
+                            await api.updateProgress(courseId, { timeSpentSeconds: diff });
+                            // Update UI periodically
+                            if (diff % 10 === 0) updateProgressDisplay();
+                        } catch (error) {
+                            console.error('Failed to update progress', error);
+                        }
+                    }
+                }, 10000); // Check every 10 seconds
+            }
+            // Handle Video/Audio progress
+            else if (course.contentType === 'video' || course.contentType === 'audio') {
+                const mediaElement = document.querySelector(course.contentType);
+                if (mediaElement) {
+                    // Update progress every 5 seconds during playback
+                    mediaElement.addEventListener('timeupdate', throttle(async () => {
+                        try {
+                            if (!mediaElement.paused && !mediaElement.ended) {
+                                await api.updateProgress(courseId, {
+                                    currentPositionSeconds: current,
+                                    totalDurationSeconds: duration
+                                });
+                                updateProgressDisplay();
+                            }
+                        } catch (error) {
+                            console.error('Failed to update progress', error);
+                        }
+                    }, 5000));
+
+                    // Also update when paused or ended to capture exact spot
+                    mediaElement.addEventListener('pause', async () => {
+                        try {
+                            await api.updateProgress(courseId, {
+                                currentPositionSeconds: Math.floor(mediaElement.currentTime),
+                                totalDurationSeconds: Math.floor(mediaElement.duration)
+                            });
+                            updateProgressDisplay();
+                        } catch (error) {
+                            console.error('Failed to update progress on pause', error);
+                        }
+                    });
+
+                    mediaElement.addEventListener('ended', async () => {
+                        setTimeout(updateProgressDisplay, 1000);
+                    });
+                }
+            }
+        }
 
         async function enrollFree() {
-            // For free courses, no bank credentials needed
             try {
                 showLoading();
                 await api.purchaseCourse(courseId);
@@ -373,11 +595,8 @@
         }
 
         async function openPaymentModal() {
-            // Use Stripe Checkout for paid courses
             try {
                 showLoading();
-
-                // Create Stripe checkout session
                 const response = await fetch('/api/payment/create-checkout-session', {
                     method: 'POST',
                     headers: {
@@ -391,7 +610,6 @@
                 hideLoading();
 
                 if (data.success) {
-                    // Redirect to Stripe Checkout
                     window.location.href = data.data.url;
                 } else {
                     showToast(data.message || 'Failed to initiate payment', 'error');
@@ -403,22 +621,119 @@
             }
         }
 
-        function closePaymentModal() {
-            // Not needed anymore, but kept for compatibility
+        // Exam Logic
+        async function openExamModal() {
+            try {
+                showLoading();
+                const response = await api.getExam(courseId);
+                hideLoading();
+
+                examQuestions = response.data?.questions || [];
+                if (examQuestions.length === 0) {
+                    showToast('No questions found for this exam', 'warning');
+                    return;
+                }
+
+                renderExamQuestions();
+                const modal = document.getElementById('examModal');
+                const modalContent = modal.querySelector('.modal-content');
+
+                // Reset scroll position to top
+                if (modalContent) {
+                    modalContent.scrollTop = 0;
+                }
+
+                // Show modal
+                modal.style.display = 'flex';
+
+                // Prevent body scrolling
+                document.body.style.overflow = 'hidden';
+            } catch (error) {
+                hideLoading();
+                showToast(error.message || 'Failed to load exam', 'error');
+            }
         }
 
-        async function purchaseCourse() {
-            // This function is now handled by Stripe
-            // Kept for backward compatibility
+        function closeExamModal() {
+            document.getElementById('examModal').style.display = 'none';
+            document.body.style.overflow = '';
         }
+
+        function renderExamQuestions() {
+            const container = document.getElementById('examQuestions');
+            container.innerHTML = examQuestions.map((q, index) => `
+                <div class="exam-question">
+                    <p class="mb-3"><strong>${index + 1}. ${q.questionText}</strong> <span class="text-muted">(${q.points} pts)</span></p>
+                    ${q.questionType === 'mcq' ? renderMcqOptions(q) : renderQuizInput(q)}
+                </div>
+            `).join('');
+        }
+
+        function renderMcqOptions(question) {
+            return `
+                <div class="options-group">
+                    ${question.options.map(opt => `
+                        <label class="exam-option">
+                            <input type="radio" name="q_${question.id}" value="${opt.id}" required>
+                            <span>${opt.text}</span>
+                        </label>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderQuizInput(question) {
+            return `
+                <div class="form-group">
+                    <input type="text" name="q_${question.id}" placeholder="Type your answer here..." required>
+                </div>
+            `;
+        }
+
+        document.getElementById('examForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const answers = {};
+            const formData = new FormData(this);
+
+            examQuestions.forEach(q => {
+                const val = formData.get(`q_${q.id}`);
+                if (val) answers[q.id] = val;
+            });
+
+            try {
+                showLoading();
+                const response = await api.submitExam(courseId, answers);
+                hideLoading();
+
+                const result = response.data;
+                const passedClass = result.passed ? 'score-pass' : 'score-fail';
+                const message = result.passed ? 'Congratulations! You passed.' : 'You did not pass. Please try again.';
+
+                document.getElementById('examBody').innerHTML = `
+                    <div class="text-center" style="padding: var(--space-xl);">
+                        <h3 class="${passedClass}">${result.passed ? 'PASSED' : 'FAILED'}</h3>
+                        <div class="result-score ${passedClass}">${Number(result.score).toFixed(0)}%</div>
+                        <p class="mb-4">${message}</p>
+                        <p>Total Points: ${result.pointsEarned} / ${result.totalPoints}</p>
+                        <button onclick="location.reload()" class="btn btn-primary mt-4">Close & Refresh</button>
+                    </div>
+                `;
+            } catch (error) {
+                hideLoading();
+                showToast(error.message || 'Failed to submit exam', 'error');
+            }
+        });
 
         async function completeCourse() {
             try {
                 showLoading();
                 const response = await api.completeCourse(courseId);
                 hideLoading();
-                showToast('Congratulations! Course completed.', 'success');
-                setTimeout(() => window.location.href = '/pages/learner-dashboard.html', 2000);
+                showToast('Certificate generated successfully! Check your email.', 'success');
+                if (response.data.certificateUrl) {
+                    window.open(response.data.certificateUrl, '_blank');
+                }
             } catch (error) {
                 hideLoading();
                 showToast(error.message || 'Failed to complete course', 'error');

@@ -105,12 +105,12 @@ class APIClient {
     }
 
     // Learner endpoints
-    async setupBank(accountNumber, secret) {
-        return this.request('/learner/bank-setup', {
-            method: 'POST',
-            body: { accountNumber, secret },
-        });
-    }
+    // async setupBank(accountNumber, secret) {
+    //     return this.request('/learner/bank-setup', {
+    //         method: 'POST',
+    //         body: { accountNumber, secret },
+    //     });
+    // }
 
     async getLearnerHome() {
         return this.request('/learner/home');
@@ -148,6 +148,13 @@ class APIClient {
         return this.request(`/courses/${id}/content`);
     }
 
+    async updateProgress(id, progressData) {
+        return this.request(`/courses/${id}/progress`, {
+            method: 'POST',
+            body: progressData,
+        });
+    }
+
     async completeCourse(id) {
         return this.request(`/courses/${id}/complete`, {
             method: 'POST',
@@ -155,13 +162,13 @@ class APIClient {
     }
 
     // Bank endpoints
-    async getBalance() {
-        return this.request('/bank/balance');
-    }
+    // async getBalance() {
+    //     return this.request('/bank/balance');
+    // }
 
-    async getTransactions() {
-        return this.request('/bank/transactions');
-    }
+    // async getTransactions() {
+    //     return this.request('/bank/transactions');
+    // }
 
     async getInstructorEarnings() {
         return this.request('/payment/instructor/earnings');
@@ -176,6 +183,47 @@ class APIClient {
             method: 'POST',
             body: { accountNumber, secret },
             includeAuth: false,
+        });
+    }
+
+    // Exam/Question endpoints (Instructor)
+    async getQuestions(courseId) {
+        return this.request(`/instructor/courses/${courseId}/questions`);
+    }
+
+    async addQuestion(courseId, questionData) {
+        return this.request(`/instructor/courses/${courseId}/questions`, {
+            method: 'POST',
+            body: questionData,
+        });
+    }
+
+    async updateQuestion(questionId, questionData) {
+        return this.request(`/instructor/questions/${questionId}`, {
+            method: 'PUT',
+            body: questionData,
+        });
+    }
+
+    async deleteQuestion(questionId) {
+        return this.request(`/instructor/questions/${questionId}`, {
+            method: 'DELETE',
+        });
+    }
+
+    // Exam/Progress endpoints (Learner)
+    async getProgress(courseId) {
+        return this.request(`/courses/${courseId}/progress`);
+    }
+
+    async getExam(courseId) {
+        return this.request(`/courses/${courseId}/exam`);
+    }
+
+    async submitExam(courseId, answers) {
+        return this.request(`/courses/${courseId}/exam`, {
+            method: 'POST',
+            body: { answers }
         });
     }
 }

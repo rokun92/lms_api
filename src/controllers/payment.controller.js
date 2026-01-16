@@ -72,7 +72,10 @@ const createCheckoutSession = async (req, res, next) => {
                             description: course.description || 'Online Course',
                             images: course.thumbnail ? [course.thumbnail] : [],
                         },
-                        unit_amount: Math.round(parseFloat(course.price) * 100), // Convert to cents
+                        // Stripe requires minimum charge of ~$0.50 USD.
+                        // We treat the course price as USD and convert to BDT.
+                        // 1 USD ~ 120 BDT.
+                        unit_amount: Math.round(parseFloat(course.price) * 120), // Convert USD to BDT (in poisha)
                     },
                     quantity: 1,
                 },

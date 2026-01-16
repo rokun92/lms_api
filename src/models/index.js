@@ -3,6 +3,8 @@ const Organization = require('./organization.model');
 const Course = require('./course.model');
 const Transaction = require('./transaction.model');
 const Enrollment = require('./enrollment.model');
+const Question = require('./question.model');
+const ExamAttempt = require('./examAttempt.model');
 
 // User - Course (Instructor creates courses)
 User.hasMany(Course, {
@@ -34,7 +36,25 @@ Enrollment.belongsTo(Course, {
     as: 'course'
 });
 
+// Course - Question (Course has many exam questions)
+Course.hasMany(Question, {
+    foreignKey: 'courseId',
+    as: 'questions'
+});
+Question.belongsTo(Course, {
+    foreignKey: 'courseId',
+    as: 'course'
+});
 
+// Enrollment - ExamAttempt (Enrollment has many exam attempts)
+Enrollment.hasMany(ExamAttempt, {
+    foreignKey: 'enrollmentId',
+    as: 'examAttempts'
+});
+ExamAttempt.belongsTo(Enrollment, {
+    foreignKey: 'enrollmentId',
+    as: 'enrollment'
+});
 
 // Course - Transaction
 Course.hasMany(Transaction, {
@@ -51,5 +71,7 @@ module.exports = {
     Organization,
     Course,
     Transaction,
-    Enrollment
+    Enrollment,
+    Question,
+    ExamAttempt
 };

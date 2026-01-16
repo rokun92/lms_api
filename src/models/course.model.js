@@ -58,6 +58,21 @@ const Course = sequelize.define('Course', {
             model: 'users',
             key: 'id'
         }
+    },
+    // Duration of video/audio content in seconds
+    contentDurationSeconds: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    // Required reading time for text content (in minutes)
+    requiredReadingMinutes: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0
+    },
+    // Passing score for exam (percentage)
+    passingScore: {
+        type: DataTypes.INTEGER,
+        defaultValue: 70
     }
 }, {
     tableName: 'courses',

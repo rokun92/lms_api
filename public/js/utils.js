@@ -69,7 +69,7 @@ function hideLoading() {
 
 // Format currency
 function formatCurrency(amount) {
-    return new Intl.NumberFormat('bn-BD', {
+    return new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'BDT'
     }).format(amount);
@@ -149,6 +149,18 @@ function debounce(func, wait) {
         clearTimeout(timeout);
         timeout = setTimeout(later, wait);
     };
+}
+
+// Throttle function
+function throttle(func, limit) {
+    let inThrottle;
+    return function (...args) {
+        if (!inThrottle) {
+            func.apply(this, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    }
 }
 
 // Handle form submission with loading

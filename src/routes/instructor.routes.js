@@ -7,6 +7,12 @@ const {
     updateProfile,
     getTransactionHistory
 } = require('../controllers/instructor.controller');
+const {
+    addQuestion,
+    getQuestions,
+    updateQuestion,
+    deleteQuestion
+} = require('../controllers/exam.controller');
 const authenticate = require('../middleware/auth');
 const checkRole = require('../middleware/roleCheck');
 const { upload } = require('../config/cloudinary');
@@ -144,5 +150,115 @@ router.put('/profile', updateProfile);
  *         description: Unauthorized
  */
 router.get('/transactions', getTransactionHistory);
+
+/**
+ * @swagger
+ * /api/instructor/courses/{courseId}/questions:
+ *   post:
+ *     summary: Add a question to a course
+ *     tags: [Instructor]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: courseId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - questionText
+ *               - questionType
+ *             properties:
+ *               questionText:
+ *                 type: string
+ *               questionType:
+ *                 type: string
+ *                 enum: [mcq, quiz]
+ *               options:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     text:
+ *                       type: string
+ *                     isCorrect:
+ *                       type: boolean
+ *               correctAnswer:
+ *                 type: string
+ *               points:
+ *                 type: integer
+ *     responses:
+ *       201:
+ *         description: Question added successfully
+ */
+router.post('/courses/:courseId/questions', addQuestion);
+
+/**
+ * @swagger
+ * /api/instructor/courses/{courseId}/questions:
+ *   get:
+ *     summary: Get all questions for a course (with answers)
+ *     tags: [Instructor]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: courseId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of questions
+ */
+router.get('/courses/:courseId/questions', getQuestions);
+
+/**
+ * @swagger
+ * /api/instructor/questions/{questionId}:
+ *   put:
+ *     summary: Update a question
+ *     tags: [Instructor]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: questionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Question updated successfully
+ */
+router.put('/questions/:questionId', updateQuestion);
+
+/**
+ * @swagger
+ * /api/instructor/questions/{questionId}:
+ *   delete:
+ *     summary: Delete a question
+ *     tags: [Instructor]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: questionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Question deleted successfully
+ */
+router.delete('/questions/:questionId', deleteQuestion);
 
 module.exports = router;

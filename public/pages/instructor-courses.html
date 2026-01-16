@@ -150,8 +150,9 @@
                             </div>
                         </div>
                         <p class="text-muted">${course.description}</p>
-                        <div style="display: flex; gap: var(--space-md); margin-top: var(--space-md);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: var(--space-md);">
                             <small class="text-muted">Created: ${formatDate(course.createdAt)}</small>
+                            <a href="/pages/manage-exam.html?courseId=${course.id}" class="btn btn-outline" style="font-size: 0.875rem;">📝 Manage Exam</a>
                         </div>
                     </div>
                 `).join('');

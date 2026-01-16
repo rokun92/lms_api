@@ -179,7 +179,7 @@ const getCourseContent = async (req, res, next) => {
     }
 };
 
-// Mark course as complete
+// Mark course as complete - requires 100% content + passed exam
 const completeCourse = async (req, res, next) => {
     try {
         const { id } = req.params;
@@ -223,7 +223,33 @@ const completeCourse = async (req, res, next) => {
             });
         }
 
-        // Mark as complete
+        // NEW: Check content completion (100% required)
+        if (enrollment.contentProgress < 100) {
+            return res.status(400).json({
+                success: false,
+                message: `You must complete all course content first. Current progress: ${enrollment.contentProgress}%`,
+                data: {
+                    contentProgress: enrollment.contentProgress,
+                    required: 100
+                }
+            });
+        }
+
+        // NEW: Check exam passed (70% required)
+        if (!enrollment.examPassed) {
+            return res.status(400).json({
+                success: false,
+                message: `You must pass the exam with at least ${enrollment.course.passingScore || 70}% to complete the course`,
+                data: {
+                    examPassed: enrollment.examPassed,
+                    examScore: enrollment.examScore,
+                    examAttempts: enrollment.examAttemptCount,
+                    required: enrollment.course.passingScore || 70
+                }
+            });
+        }
+
+        // All requirements met - mark as complete
         enrollment.progress = 100;
         enrollment.completed = true;
         enrollment.completedAt = new Date();
