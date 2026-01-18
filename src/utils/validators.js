@@ -1,25 +1,8 @@
-/**
- * Validation Utilities
- * 
- * This module provides reusable validation functions for request data.
- * Helps maintain consistent validation logic across controllers.
- */
+
 
 const { CONTENT_TYPES, QUESTION_TYPES, USER_ROLES, MIN_MCQ_OPTIONS } = require('../constants');
 
-/**
- * Validate required fields are present in an object
- * 
- * @param {Object} data - The data object to validate
- * @param {string[]} requiredFields - Array of required field names
- * @returns {{valid: boolean, missingFields: string[]}}
- * 
- * @example
- * const result = validateRequiredFields(req.body, ['email', 'password']);
- * if (!result.valid) {
- *   return res.status(400).json({ message: `Missing fields: ${result.missingFields.join(', ')}` });
- * }
- */
+
 function validateRequiredFields(data, requiredFields) {
     const missingFields = requiredFields.filter(field => !data[field]);
 
@@ -29,12 +12,7 @@ function validateRequiredFields(data, requiredFields) {
     };
 }
 
-/**
- * Validate email format
- * 
- * @param {string} email - Email address to validate
- * @returns {boolean} True if email format is valid
- */
+
 function validateEmail(email) {
     if (!email || typeof email !== 'string') return false;
 
@@ -42,12 +20,7 @@ function validateEmail(email) {
     return emailRegex.test(email);
 }
 
-/**
- * Validate user role
- * 
- * @param {string} role - Role to validate
- * @returns {{valid: boolean, message: string}}
- */
+
 function validateUserRole(role) {
     const validRoles = Object.values(USER_ROLES);
 
@@ -61,12 +34,7 @@ function validateUserRole(role) {
     return { valid: true };
 }
 
-/**
- * Validate course content type
- * 
- * @param {string} contentType - Content type to validate
- * @returns {{valid: boolean, message: string}}
- */
+
 function validateContentType(contentType) {
     const validTypes = Object.values(CONTENT_TYPES);
 
@@ -80,12 +48,7 @@ function validateContentType(contentType) {
     return { valid: true };
 }
 
-/**
- * Validate question type
- * 
- * @param {string} questionType - Question type to validate
- * @returns {{valid: boolean, message: string}}
- */
+
 function validateQuestionType(questionType) {
     const validTypes = Object.values(QUESTION_TYPES);
 
@@ -99,12 +62,7 @@ function validateQuestionType(questionType) {
     return { valid: true };
 }
 
-/**
- * Validate MCQ options
- * 
- * @param {Array} options - Array of MCQ options
- * @returns {{valid: boolean, message: string}}
- */
+
 function validateMCQOptions(options) {
     // Check if options is an array
     if (!Array.isArray(options)) {
@@ -145,12 +103,7 @@ function validateMCQOptions(options) {
     return { valid: true };
 }
 
-/**
- * Validate UUID format
- * 
- * @param {string} uuid - UUID string to validate
- * @returns {boolean} True if UUID format is valid
- */
+
 function validateUUID(uuid) {
     if (!uuid || typeof uuid !== 'string') return false;
 
@@ -158,14 +111,7 @@ function validateUUID(uuid) {
     return uuidRegex.test(uuid);
 }
 
-/**
- * Validate numeric value is within range
- * 
- * @param {number} value - Value to validate
- * @param {number} min - Minimum allowed value
- * @param {number} max - Maximum allowed value
- * @returns {{valid: boolean, message: string}}
- */
+
 function validateRange(value, min, max) {
     const num = Number(value);
 
@@ -186,12 +132,7 @@ function validateRange(value, min, max) {
     return { valid: true };
 }
 
-/**
- * Validate password strength
- * 
- * @param {string} password - Password to validate
- * @returns {{valid: boolean, message: string}}
- */
+
 function validatePassword(password) {
     if (!password || typeof password !== 'string') {
         return {
@@ -210,24 +151,14 @@ function validatePassword(password) {
     return { valid: true };
 }
 
-/**
- * Sanitize string input (remove extra whitespace, trim)
- * 
- * @param {string} str - String to sanitize
- * @returns {string} Sanitized string
- */
+
 function sanitizeString(str) {
     if (!str || typeof str !== 'string') return '';
 
     return str.trim().replace(/\s+/g, ' ');
 }
 
-/**
- * Validate price value
- * 
- * @param {number|string} price - Price to validate
- * @returns {{valid: boolean, message: string}}
- */
+
 function validatePrice(price) {
     const num = Number(price);
 
@@ -248,9 +179,6 @@ function validatePrice(price) {
     return { valid: true };
 }
 
-// ============================================================================
-// EXPORTS
-// ============================================================================
 
 module.exports = {
     validateRequiredFields,

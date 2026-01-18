@@ -1,7 +1,6 @@
 require('dotenv').config();
 const app = require('./src/app');
 const { connectDB } = require('./src/config/database');
-const initializeSystem = require('./src/utils/initializeSystem');
 
 const PORT = process.env.PORT || 3000;
 
@@ -9,9 +8,6 @@ const startServer = async () => {
     try {
         // Connect to database
         await connectDB();
-
-        // Initialize system (create org and instructors)
-        await initializeSystem();
 
         // Start server
         app.listen(PORT, () => {

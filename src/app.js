@@ -1,3 +1,4 @@
+//importing required modules
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
@@ -9,7 +10,6 @@ const instructorRoutes = require('./routes/instructor.routes');
 const learnerRoutes = require('./routes/learner.routes');
 const courseRoutes = require('./routes/course.routes');
 const paymentRoutes = require('./routes/payment.routes');
-const bankRoutes = require('./routes/bank.routes');
 
 const app = express();
 
@@ -32,7 +32,7 @@ if (process.env.NODE_ENV === 'development') {
     });
 }
 
-// Health check
+// API Health Check and Info
 app.get('/', (req, res) => {
     res.json({
         success: true,
@@ -44,7 +44,6 @@ app.get('/', (req, res) => {
             learner: '/api/learner',
             courses: '/api/courses',
             payment: '/api/payment',
-            bank: '/api/bank',
             docs: '/docs'
         }
     });
@@ -62,7 +61,6 @@ app.use('/api/instructor', instructorRoutes);
 app.use('/api/learner', learnerRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/payment', paymentRoutes);
-app.use('/api/bank', bankRoutes);
 
 // 404 handler
 app.use((req, res) => {

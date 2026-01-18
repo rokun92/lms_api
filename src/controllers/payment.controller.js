@@ -1,6 +1,5 @@
 const stripe = require('../config/stripe');
 const { Course, User, Enrollment, Transaction } = require('../models');
-const crypto = require('crypto');
 
 /**
  * Create a Stripe Checkout Session for course purchase
@@ -69,13 +68,13 @@ const createCheckoutSession = async (req, res, next) => {
                         currency: 'bdt',
                         product_data: {
                             name: course.title,
-                            description: course.description || 'Online Course',
+                            description: course.description,
                             images: course.thumbnail ? [course.thumbnail] : [],
                         },
                         // Stripe requires minimum charge of ~$0.50 USD.
                         // We treat the course price as USD and convert to BDT.
-                        // 1 USD ~ 120 BDT.
-                        unit_amount: Math.round(parseFloat(course.price) * 120), // Convert USD to BDT (in poisha)
+                        // 1 USD ~ 100 BDT.
+                        unit_amount: Math.round(parseFloat(course.price) * 100), // Convert USD to BDT (in poisha)
                     },
                     quantity: 1,
                 },
@@ -141,32 +140,6 @@ const handleWebhook = async (req, res) => {
 
             console.log(`Payment completed: User ${userId} purchased Course ${courseId} for ৳${amount}`);
 
-            // Create enrollment
-            const enrollment = await Enrollment.create({
-                learnerId: userId,
-                courseId: courseId
-            });
-
-            // Create transaction record
-            const transactionId = `STRIPE-${session.id}`;
-            const transaction = await Transaction.create({
-                transactionId,
-                fromAccountId: null, // Stripe payment, no internal account
-                toAccountId: null,
-                amount: amount,
-                transactionType: 'course_purchase',
-                status: 'completed',
-                relatedCourseId: courseId,
-                description: `Stripe payment for course purchase (Session: ${session.id})`,
-                metadata: {
-                    stripeSessionId: session.id,
-                    paymentIntent: session.payment_intent,
-                    userId,
-                    instructorId
-                }
-            });
-
-            // Update instructor's earnings (you can track this separately)
             // For now, we'll just log it
             console.log(`Instructor ${instructorId} earned ৳${amount} from course sale`);
 

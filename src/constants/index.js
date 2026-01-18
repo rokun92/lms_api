@@ -1,195 +1,57 @@
-/**
- * Application Constants
- * 
- * This file contains all constant values used throughout the application.
- * Centralizing constants makes the codebase more maintainable and easier to configure.
- */
 
-// ============================================================================
-// COURSE CONSTANTS
-// ============================================================================
-
-/**
- * Valid content types for courses
- */
 const CONTENT_TYPES = {
     TEXT: 'text',
     VIDEO: 'video',
     AUDIO: 'audio'
 };
 
-/**
- * Course status values
- */
+
 const COURSE_STATUS = {
     ACTIVE: 'active',
     INACTIVE: 'inactive'
 };
-
-/**
- * Default passing score percentage for exams
- */
 const DEFAULT_PASSING_SCORE = 70;
-
-/**
- * Default course price in BDT (if not specified)
- */
 const DEFAULT_COURSE_PRICE = 100;
-
-// ============================================================================
-// PROGRESS TRACKING CONSTANTS
-// ============================================================================
-
-/**
- * Average reading speed in words per minute
- * Used to calculate required reading time for text content
- */
 const READING_SPEED_WPM = 200;
-
-/**
- * Minimum required reading time in seconds
- * Applied to very short text content
- */
 const MIN_READING_TIME_SECONDS = 10;
-
-/**
- * Progress percentage thresholds
- */
 const PROGRESS = {
     MIN: 0,
     MAX: 100,
     COMPLETE: 100
 };
 
-/**
- * Milliseconds to seconds conversion factor
- * Used when frontend sends time in milliseconds instead of seconds
- */
 const MS_TO_SECONDS_THRESHOLD = 2;
-
-// ============================================================================
-// EXAM CONSTANTS
-// ============================================================================
-
-/**
- * Question types for exams
- */
 const QUESTION_TYPES = {
     MCQ: 'mcq',      // Multiple Choice Question
     QUIZ: 'quiz'     // Short Answer/Fill in the blank
 };
-
-/**
- * Minimum number of options required for MCQ questions
- */
 const MIN_MCQ_OPTIONS = 2;
-
-/**
- * Default points per question
- */
 const DEFAULT_QUESTION_POINTS = 1;
-
-// ============================================================================
-// USER CONSTANTS
-// ============================================================================
-
-/**
- * User roles in the system
- */
 const USER_ROLES = {
     INSTRUCTOR: 'instructor',
     LEARNER: 'learner'
 };
-
-/**
- * BCrypt salt rounds for password hashing
- */
 const BCRYPT_SALT_ROUNDS = 10;
-
-// ============================================================================
-// PAYMENT CONSTANTS
-// ============================================================================
-
-/**
- * Transaction types
- */
 const TRANSACTION_TYPES = {
     COURSE_PURCHASE: 'course_purchase',
     WITHDRAWAL: 'withdrawal',
     REFUND: 'refund'
 };
-
-/**
- * Transaction status values
- */
 const TRANSACTION_STATUS = {
     PENDING: 'pending',
     COMPLETED: 'completed',
     FAILED: 'failed',
     CANCELLED: 'cancelled'
 };
-
-/**
- * Stripe currency code for Bangladesh Taka
- */
 const CURRENCY_BDT = 'bdt';
-
-/**
- * USD to BDT conversion rate (approximate)
- * Used for Stripe payments (Stripe requires minimum charge in USD equivalent)
- */
-const USD_TO_BDT_RATE = 120;
-
-/**
- * Minimum Stripe charge in BDT (approximately $0.50 USD)
- */
+const USD_TO_BDT_RATE = 100;
 const MIN_STRIPE_CHARGE_BDT = 60;
-
-// ============================================================================
-// PAGINATION CONSTANTS
-// ============================================================================
-
-/**
- * Default number of items per page for paginated results
- */
 const DEFAULT_PAGE_SIZE = 10;
-
-/**
- * Maximum number of items per page
- */
 const MAX_PAGE_SIZE = 100;
-
-/**
- * Default limit for "recent items" queries
- */
 const RECENT_ITEMS_LIMIT = 6;
-
-// ============================================================================
-// FILE UPLOAD CONSTANTS
-// ============================================================================
-
-/**
- * Cloudinary folder for certificate uploads
- */
 const CLOUDINARY_CERTIFICATE_FOLDER = 'lms-certificates';
-
-/**
- * Cloudinary resource type for certificates
- */
 const CLOUDINARY_CERTIFICATE_RESOURCE_TYPE = 'image';
-
-/**
- * Certificate file format
- */
 const CERTIFICATE_FORMAT = 'pdf';
-
-// ============================================================================
-// HTTP STATUS CODES
-// ============================================================================
-
-/**
- * Common HTTP status codes used in the application
- */
 const HTTP_STATUS = {
     OK: 200,
     CREATED: 201,
@@ -200,14 +62,6 @@ const HTTP_STATUS = {
     CONFLICT: 409,
     INTERNAL_SERVER_ERROR: 500
 };
-
-// ============================================================================
-// ERROR MESSAGES
-// ============================================================================
-
-/**
- * Standardized error messages
- */
 const ERROR_MESSAGES = {
     // Authentication
     AUTH_TOKEN_MISSING: 'No token provided. Please login first.',

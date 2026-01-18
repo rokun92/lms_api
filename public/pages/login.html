@@ -250,31 +250,6 @@
             }
         });
 
-        // Quick login for testing
-        async function quickLogin(role) {
-            const credentials = {
-                instructor: { email: 'instructor1@lms.com', password: 'password123' },
-                learner: { email: 'student@test.com', password: 'password123' }
-            };
-
-            const cred = credentials[role];
-
-            try {
-                showLoading();
-                const response = await auth.login(cred.email, cred.password);
-                hideLoading();
-                showToast('Login successful! Redirecting...', 'success');
-                setTimeout(() => auth.redirectToDashboard(), 1000);
-            } catch (error) {
-                hideLoading();
-                if (role === 'learner') {
-                    showToast('Please create a learner account first', 'info');
-                    setTimeout(() => window.location.href = '/pages/register.html', 1500);
-                } else {
-                    showToast(error.message || 'Login failed', 'error');
-                }
-            }
-        }
     </script>
 </body>
 

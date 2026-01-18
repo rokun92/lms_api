@@ -1,10 +1,3 @@
-/**
- * Instructor Controller
- * 
- * Handles instructor-specific operations including course management and profile updates.
- * Instructors can upload courses, view their courses, and manage their profile.
- */
-
 const { User, Course } = require('../models');
 const {
     HTTP_STATUS,
@@ -17,23 +10,7 @@ const {
     validateContentType
 } = require('../utils/validators');
 
-/**
- * Upload a new course
- * 
- * @route POST /api/instructor/courses
- * @access Private (Instructor only)
- * 
- * @param {Object} req.body - Course data
- * @param {string} req.body.title - Course title
- * @param {string} req.body.description - Course description
- * @param {string} req.body.contentType - Content type ('text', 'video', or 'audio')
- * @param {string} [req.body.textContent] - Text content (required for text type)
- * @param {number} [req.body.price] - Course price in BDT (default: 100)
- * @param {File} [req.file] - Uploaded file (required for video/audio types)
- * 
- * @returns {Object} 201 - Course created successfully
- * @returns {Object} 400 - Validation error
- */
+
 const uploadCourse = async (req, res, next) => {
     try {
         const { title, description, contentType, textContent, price } = req.body;
@@ -76,7 +53,6 @@ const uploadCourse = async (req, res, next) => {
             }
             courseData.textContent = textContent;
         } else if (contentType === CONTENT_TYPES.VIDEO || contentType === CONTENT_TYPES.AUDIO) {
-            // File should be uploaded via multer middleware
             if (!req.file) {
                 return res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
@@ -84,7 +60,7 @@ const uploadCourse = async (req, res, next) => {
                 });
             }
             courseData.fileUrl = req.file.path; // Cloudinary URL
-            courseData.filePublicId = req.file.filename; // Cloudinary public ID
+            courseData.filePublicId = req.file.filename; // Cloudinary public ID. which will be not seen cause cloudinary don't support
         }
 
         // Create course in database
@@ -100,14 +76,7 @@ const uploadCourse = async (req, res, next) => {
     }
 };
 
-/**
- * Get instructor's courses
- * 
- * @route GET /api/instructor/courses
- * @access Private (Instructor only)
- * 
- * @returns {Object} 200 - List of instructor's courses
- */
+
 const getMyCourses = async (req, res, next) => {
     try {
         const courses = await Course.findAll({
@@ -127,14 +96,7 @@ const getMyCourses = async (req, res, next) => {
     }
 };
 
-/**
- * Get instructor profile with courses
- * 
- * @route GET /api/instructor/profile
- * @access Private (Instructor only)
- * 
- * @returns {Object} 200 - Instructor profile with course list
- */
+
 const getProfile = async (req, res, next) => {
     try {
         const instructor = await User.findByPk(req.user.id, {
@@ -157,19 +119,7 @@ const getProfile = async (req, res, next) => {
     }
 };
 
-/**
- * Update instructor profile
- * 
- * @route PUT /api/instructor/profile
- * @access Private (Instructor only)
- * 
- * @param {Object} req.body - Profile update data
- * @param {string} [req.body.name] - Updated name
- * @param {string} [req.body.bio] - Updated bio
- * @param {string} [req.body.expertise] - Updated expertise
- * 
- * @returns {Object} 200 - Profile updated successfully
- */
+
 const updateProfile = async (req, res, next) => {
     try {
         const { name, bio, expertise } = req.body;
@@ -200,9 +150,6 @@ const updateProfile = async (req, res, next) => {
     }
 };
 
-// ============================================================================
-// EXPORTS
-// ============================================================================
 
 module.exports = {
     uploadCourse,

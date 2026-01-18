@@ -357,15 +357,7 @@
                     transactionCount = earningsResponse.data?.transactionCount || 0;
                     transactions = earningsResponse.data?.transactions || [];
                 } catch (e) {
-                    console.log('No earnings yet or earnings endpoint not available');
-                    // Fallback to regular transactions
-                    const transactionsResponse = await api.getTransactions();
-                    transactions = transactionsResponse.data?.transactions || [];
-                    // Calculate earnings from completed transactions
-                    totalEarnings = transactions
-                        .filter(t => t.status === 'completed')
-                        .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-                    transactionCount = transactions.filter(t => t.status === 'completed').length;
+                    console.warn('Failed to load earnings data:', e);
                 }
 
                 // Update stats
@@ -421,42 +413,6 @@
             }
         }
 
-        function openValidateModal(transactionId) {
-            document.getElementById('validateTransactionId').value = transactionId;
-            // Pre-fill account number if available
-            if (currentProfile && currentProfile.bankAccount) {
-                document.getElementById('validateAccountNumber').value = currentProfile.bankAccount.accountNumber;
-            }
-            document.getElementById('validationModal').style.display = 'flex';
-        }
-
-        function closeValidateModal() {
-            document.getElementById('validationModal').style.display = 'none';
-            document.getElementById('validationForm').reset();
-        }
-
-        async function handleValidation(event) {
-            event.preventDefault();
-
-            const transactionId = document.getElementById('validateTransactionId').value;
-            const accountNumber = document.getElementById('validateAccountNumber').value;
-            const secret = document.getElementById('validateSecret').value;
-
-            try {
-                showLoading();
-                await api.validateTransaction(transactionId, accountNumber, secret);
-                hideLoading();
-
-                closeValidateModal();
-                showToast('Transaction validated successfully!', 'success');
-
-                // Refresh dashboard
-                loadDashboard();
-            } catch (error) {
-                hideLoading();
-                showToast(error.message || 'Validation failed', 'error');
-            }
-        }
 
         // Load dashboard on page load
         loadDashboard();
