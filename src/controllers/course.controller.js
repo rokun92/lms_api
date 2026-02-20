@@ -198,9 +198,14 @@ const completeCourse = async (req, res, next) => {
                         {
                             model: User,
                             as: 'instructor',
-                            attributes: ['name']
+                            attributes: ['name', 'email']
                         }
                     ]
+                },
+                {
+                    model: User,
+                    as: 'learner',
+                    attributes: ['name', 'email']
                 }
             ]
         });
@@ -261,7 +266,8 @@ const completeCourse = async (req, res, next) => {
             const { cloudinary } = require('../config/cloudinary');
             const stream = require('stream');
 
-            const learnerName = req.user.name;
+            const learnerName = enrollment.learner.name;
+            const learnerEmail = enrollment.learner.email;
             const courseName = enrollment.course.title;
             const instructorName = enrollment.course.instructor.name;
 
@@ -298,10 +304,10 @@ const completeCourse = async (req, res, next) => {
             enrollment.certificateUrl = result.secure_url;
             console.log('✅ Certificate uploaded to Cloudinary:', result.secure_url);
 
-            // Send Email
-            console.log(`📧 Sending certificate email to ${req.user.email}...`);
+            // Send Email to Learner
+            console.log(`📧 Sending certificate email to ${learnerEmail}...`);
             const emailResult = await sendEmail(
-                req.user.email,
+                learnerEmail,
                 `Certificate of Completion: ${courseName}`,
                 `Congratulations ${learnerName}!\n\nYou have successfully completed the course "${courseName}".\n\nPlease find your certificate attached.\n\nYou can also view and download it from your dashboard.`,
                 [
@@ -313,13 +319,16 @@ const completeCourse = async (req, res, next) => {
             );
             
             if (emailResult.success) {
-                console.log('✅ Certificate email sent successfully');
+                console.log('✅ Certificate email sent to learner successfully');
             } else {
                 console.error('❌ Certificate email failed:', emailResult.error);
             }
         } catch (err) {
-            console.error('\n❌ Error generating/sending certificate:', err.message);
-            console.error('Full error:', err);
+            console.error('\n❌ ERROR during certificate generation/sending:');
+            console.error(`   Error Message: ${err.message}`);
+            console.error(`   Error Code: ${err.code}`);
+            console.error(`   Error Name: ${err.name}`);
+            console.error(`   Stack: ${err.stack}`);
             // Don't fail the request if certificate fails, just log it
         }
 

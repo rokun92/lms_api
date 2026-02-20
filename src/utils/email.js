@@ -2,27 +2,35 @@ const nodemailer = require('nodemailer');
 
 const sendEmail = async (to, subject, text, attachments = []) => {
     try {
-        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+        const emailUser = process.env.EMAIL_USER;
+        const emailPass = process.env.EMAIL_PASS;
+        const emailService = process.env.EMAIL_SERVICE || 'gmail';
+
+        console.log(`\n📧 Email Configuration:`);
+        console.log(`   Service: ${emailService}`);
+        console.log(`   User: ${emailUser ? '✅ Set' : '❌ Missing'}`);
+        console.log(`   Pass: ${emailPass ? '✅ Set (' + emailPass.length + ' chars)' : '❌ Missing'}`);
+
+        if (!emailUser || !emailPass) {
             console.error('❌ Email credentials not found in environment variables.');
-            console.log('--- EMAIL SIMULATION ---');
-            console.log(`To: ${to}`);
-            console.log(`Subject: ${subject}`);
-            console.log(`Attachments: ${attachments.length}`);
-            console.log('------------------------');
             return { success: false, error: 'Email credentials missing' };
         }
 
-        console.log(`📧 Initializing email transporter with service: ${process.env.EMAIL_SERVICE || 'gmail'}`);
+        console.log(`\n🔧 Creating transporter for ${emailService}...`);
+        
+        // Remove spaces from password in case they exist
+        const cleanPass = emailPass.trim();
         
         const transporter = nodemailer.createTransport({
-            service: process.env.EMAIL_SERVICE || 'gmail',
+            service: emailService,
             auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
+                user: emailUser.trim(),
+                pass: cleanPass
             }
         });
 
         // Verify transporter connection
+        console.log(`🔐 Verifying email credentials...`);
         await transporter.verify();
         console.log('✅ Email transporter verified successfully');
 
@@ -34,13 +42,20 @@ const sendEmail = async (to, subject, text, attachments = []) => {
             attachments
         };
 
-        console.log(`📤 Sending email to ${to}...`);
+        console.log(`\n📤 Sending email...`);
+        console.log(`   To: ${to}`);
+        console.log(`   Subject: ${subject}`);
+        console.log(`   Attachments: ${attachments.length}`);
+        
         const info = await transporter.sendMail(mailOptions);
-        console.log(`✅ Email sent successfully: ${info.response}`);
+        console.log(`✅ Email sent successfully!`);
+        console.log(`   Response: ${info.response}`);
         return { success: true, messageId: info.messageId };
     } catch (error) {
-        console.error('❌ Error sending email:', error.message);
-        console.error('Full error details:', error);
+        console.error('\n❌ Error sending email:');
+        console.error(`   Message: ${error.message}`);
+        console.error(`   Code: ${error.code}`);
+        console.error('   Full error:', error);
         return { success: false, error: error.message };
     }
 };
