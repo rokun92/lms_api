@@ -18,16 +18,36 @@ const sendEmail = async (to, subject, text, attachments = []) => {
 
         console.log(`\n🔧 Creating transporter for ${emailService}...`);
         
-        // Remove spaces from password in case they exist
+        // Remove spaces from password
         const cleanPass = emailPass.trim();
+        const cleanUser = emailUser.trim();
         
-        const transporter = nodemailer.createTransport({
-            service: emailService,
-            auth: {
-                user: emailUser.trim(),
-                pass: cleanPass
+        // Use explicit SMTP configuration for better reliability
+        const transportConfig = emailService.toLowerCase() === 'gmail' 
+            ? {
+                host: 'smtp.gmail.com',
+                port: 587,
+                secure: false, // Use TLS (not SSL)
+                auth: {
+                    user: cleanUser,
+                    pass: cleanPass
+                },
+                connectionTimeout: 10000,
+                socketTimeout: 10000,
+                maxConnections: 5,
+                maxMessages: 100,
+                rateDelta: 1000,
+                rateLimit: 5
             }
-        });
+            : {
+                service: emailService,
+                auth: {
+                    user: cleanUser,
+                    pass: cleanPass
+                }
+            };
+
+        const transporter = nodemailer.createTransport(transportConfig);
 
         // Verify transporter connection
         console.log(`🔐 Verifying email credentials...`);
