@@ -265,8 +265,9 @@ const completeCourse = async (req, res, next) => {
             const courseName = enrollment.course.title;
             const instructorName = enrollment.course.instructor.name;
 
-            console.log(`Generating certificate for ${learnerName} - ${courseName}`);
+            console.log(`\n🎓 Generating certificate for ${learnerName} - ${courseName}`);
             const pdfBuffer = await generateCertificate(learnerName, courseName, instructorName);
+            console.log(`✅ Certificate PDF generated (${pdfBuffer.length} bytes)`);
 
             // Upload to Cloudinary
             const uploadStream = (buffer) => {
@@ -274,12 +275,15 @@ const completeCourse = async (req, res, next) => {
                     const uploadStream = cloudinary.uploader.upload_stream(
                         {
                             folder: 'lms-certificates',
-                            resource_type: 'image', // Use image to allow PDF preview/thumbnails if supported, or 'raw'
+                            resource_type: 'raw',
                             format: 'pdf',
                             public_id: `certificate_${enrollment.id}_${Date.now()}`
                         },
                         (error, result) => {
-                            if (error) return reject(error);
+                            if (error) {
+                                console.error('❌ Cloudinary upload error:', error);
+                                return reject(error);
+                            }
                             resolve(result);
                         }
                     );
@@ -289,14 +293,14 @@ const completeCourse = async (req, res, next) => {
                 });
             };
 
-            console.log('Uploading certificate to Cloudinary...');
+            console.log('☁️ Uploading certificate to Cloudinary...');
             const result = await uploadStream(pdfBuffer);
             enrollment.certificateUrl = result.secure_url;
-            console.log('Certificate uploaded:', result.secure_url);
+            console.log('✅ Certificate uploaded to Cloudinary:', result.secure_url);
 
             // Send Email
-            console.log('Sending certificate email...');
-            await sendEmail(
+            console.log(`📧 Sending certificate email to ${req.user.email}...`);
+            const emailResult = await sendEmail(
                 req.user.email,
                 `Certificate of Completion: ${courseName}`,
                 `Congratulations ${learnerName}!\n\nYou have successfully completed the course "${courseName}".\n\nPlease find your certificate attached.\n\nYou can also view and download it from your dashboard.`,
@@ -307,8 +311,15 @@ const completeCourse = async (req, res, next) => {
                     }
                 ]
             );
+            
+            if (emailResult.success) {
+                console.log('✅ Certificate email sent successfully');
+            } else {
+                console.error('❌ Certificate email failed:', emailResult.error);
+            }
         } catch (err) {
-            console.error('Error generating/sending certificate:', err);
+            console.error('\n❌ Error generating/sending certificate:', err.message);
+            console.error('Full error:', err);
             // Don't fail the request if certificate fails, just log it
         }
 
