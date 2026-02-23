@@ -2,7 +2,7 @@ const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
 if (process.env.DATABASE_URL) {
-  // Production (Render)
+  // Production 
   sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: 'postgres',
     protocol: 'postgres',
@@ -41,10 +41,11 @@ const connectDB = async () => {
     console.log('PostgreSQL Database connected successfully');
 
     // Sync all models - use alter to add new columns to existing tables
-    await sequelize.sync({ alter: true });
-    console.log('Database schema synchronized');
-
-    return sequelize;
+    if (process.env.NODE_ENV === 'development') {
+      await sequelize.sync({ alter: true });
+    } else {
+      await sequelize.sync();
+    }
   } catch (error) {
     console.error('Unable to connect to the database:', error.message);
     process.exit(1);

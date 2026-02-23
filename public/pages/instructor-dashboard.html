@@ -287,7 +287,7 @@
     </div>
 
     <!-- Validation Modal -->
-    <div id="validationModal" class="loading-overlay" style="display: none;">
+    <!-- <div id="validationModal" class="loading-overlay" style="display: none;">
         <div class="card" style="width: 90%; max-width: 500px; position: relative;">
             <button onclick="closeValidateModal()" class="btn btn-outline btn-sm"
                 style="position: absolute; top: 1rem; right: 1rem; border: none;">✕</button>
@@ -313,13 +313,12 @@
                 </div>
             </form>
         </div>
-    </div>
+    </div> -->
 
     <script src="/js/api.js"></script>
     <script src="/js/auth.js"></script>
     <script src="/js/utils.js"></script>
     <script>
-        // Protect page - require instructor role
         if (!auth.requireAuth('instructor')) {
             // Will redirect if not authenticated or wrong role
         }
@@ -338,15 +337,12 @@
                 const user = auth.getCurrentUser();
                 document.getElementById('welcomeText').textContent = `Welcome back, ${user.name}!`;
 
-                // Get instructor profile (includes bank info)
                 const profileResponse = await api.getInstructorProfile();
                 currentProfile = profileResponse.data?.user || {};
 
-                // Get courses
                 const coursesResponse = await api.getInstructorCourses();
                 const courses = coursesResponse.data?.courses || [];
 
-                // Get instructor earnings from course sales
                 let totalEarnings = 0;
                 let transactionCount = 0;
                 let transactions = [];
@@ -413,8 +409,6 @@
             }
         }
 
-
-        // Load dashboard on page load
         loadDashboard();
     </script>
 </body>

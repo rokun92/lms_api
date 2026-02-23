@@ -33,14 +33,11 @@ const Course = sequelize.define('Course', {
         type: DataTypes.TEXT,
         allowNull: true
     },
-    // For video/audio courses - Cloudinary URL
-    fileUrl: {
-        type: DataTypes.STRING,
-        allowNull: true
-    },
-    filePublicId: {
-        type: DataTypes.STRING,
-        allowNull: true
+    // For video/audio courses - Array of Cloudinary URLs and metadata
+    fileUrls: {
+        type: DataTypes.JSON,
+        allowNull: true,
+        defaultValue: []
     },
     price: {
         type: DataTypes.DECIMAL(10, 2),

@@ -431,6 +431,25 @@
             }
         }
 
+        // Global variables for playlist
+        let playlistFiles = [];
+
+        function switchFile(index) {
+            if (index < 0 || index >= playlistFiles.length) return;
+            
+            const media = document.getElementById('courseMedia');
+            const file = playlistFiles[index];
+            media.src = file.url;
+            media.load();
+            media.play();
+            
+            // Highlight current file
+            document.querySelectorAll('.playlist-item').forEach((item, i) => {
+                item.style.borderColor = i === index ? 'rgba(0,245,255,0.5)' : 'transparent';
+                item.style.background = i === index ? 'rgba(0,245,255,0.2)' : 'rgba(0,245,255,0.1)';
+            });
+        }
+
         function displayEnrolledContent(course, contentData) {
             // Hide sidebar and expand main content
             document.getElementById('sidebarColumn').style.display = 'none';
@@ -444,13 +463,50 @@
             if (course.contentType === 'text') {
                 contentDiv.innerHTML = `<div style="background: rgba(255,255,255,0.05); padding: var(--space-xl); border-radius: var(--radius-lg); white-space: pre-wrap;">${contentData.course.textContent}</div>`;
             } else if (course.contentType === 'video' || course.contentType === 'audio') {
-                contentDiv.innerHTML = `
-                     <div style="background: black; border-radius: var(--radius-lg); overflow: hidden;">
-                        <${course.contentType} controls style="width: 100%; max-width: 100%; display: block;">
-                            <source src="${contentData.course.fileUrl}">
-                        </${course.contentType}>
-                    </div>
-                `;
+                const files = contentData.course.fileUrls || [];
+                if (files.length === 0) {
+                    contentDiv.innerHTML = `<div style="text-align: center; padding: var(--space-2xl);">No media files available</div>`;
+                } else if (files.length === 1) {
+                    // Single file - show directly
+                    const file = files[0];
+                    contentDiv.innerHTML = `
+                        <div style="background: black; border-radius: var(--radius-lg); overflow: hidden;">
+                            <${course.contentType} id="courseMedia" controls style="width: 100%; max-width: 100%; display: block;">
+                                <source src="${file.url}">
+                            </${course.contentType}>
+                        </div>
+                    `;
+                } else {
+                    // Multiple files - create playlist
+                    playlistFiles = files; // Store globally
+                    
+                    let playlistHTML = `
+                        <div style="display: grid; grid-template-columns: 1fr 300px; gap: var(--space-lg);">
+                            <div style="background: black; border-radius: var(--radius-lg); overflow: hidden;">
+                                <${course.contentType} id="courseMedia" controls style="width: 100%; max-width: 100%; display: block;">
+                                    <source src="${files[0].url}">
+                                </${course.contentType}>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-lg); padding: var(--space-md); max-height: 400px; overflow-y: auto;">
+                                <h4 style="margin-top: 0; margin-bottom: var(--space-md);">📚 Playlist (${files.length})</h4>
+                                <div id="playlistContainer">
+                    `;
+                    
+                    files.forEach((file, index) => {
+                        playlistHTML += `
+                            <div class="playlist-item" onclick="switchFile(${index})" style="padding: var(--space-sm); margin-bottom: var(--space-sm); background: rgba(0,245,255,0.1); border-radius: var(--radius-md); cursor: pointer; border: 2px solid transparent; transition: all 0.3s;">
+                                <div style="font-size: 0.9rem; font-weight: 500;">${index + 1}. ${file.originalName || 'File ' + (index + 1)}</div>
+                            </div>
+                        `;
+                    });
+                    
+                    playlistHTML += `
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    contentDiv.innerHTML = playlistHTML;
+                }
             }
 
             // Start progress tracking

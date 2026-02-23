@@ -69,7 +69,7 @@ router.use(checkRole('instructor'));
  *       401:
  *         description: Unauthorized
  */
-router.post('/courses', upload.single('file'), uploadCourse);
+router.post('/courses', upload.array('file', 10), uploadCourse);
 
 /**
  * @swagger

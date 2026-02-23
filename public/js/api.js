@@ -171,7 +171,6 @@ class APIClient {
         });
     }
 
-    // Exam/Question endpoints (Instructor)
     async getQuestions(courseId) {
         return this.request(`/instructor/courses/${courseId}/questions`);
     }

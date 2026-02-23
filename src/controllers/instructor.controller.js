@@ -53,14 +53,18 @@ const uploadCourse = async (req, res, next) => {
             }
             courseData.textContent = textContent;
         } else if (contentType === CONTENT_TYPES.VIDEO || contentType === CONTENT_TYPES.AUDIO) {
-            if (!req.file) {
+            if (!req.files || req.files.length === 0) {
                 return res.status(HTTP_STATUS.BAD_REQUEST).json({
                     success: false,
                     message: `File upload is required for ${contentType} type courses`
                 });
             }
-            courseData.fileUrl = req.file.path; // Cloudinary URL
-            courseData.filePublicId = req.file.filename; // Cloudinary public ID. which will be not seen cause cloudinary don't support
+            // Handle multiple files
+            courseData.fileUrls = req.files.map(file => ({
+                url: file.path,
+                publicId: file.filename,
+                originalName: file.originalname
+            }));
         }
 
         // Create course in database

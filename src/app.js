@@ -18,8 +18,8 @@ app.use('/api/payment/webhook', express.raw({ type: 'application/json' }));
 
 // Middleware
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' })); // huge payload prevention
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Serve static files from public directory
 app.use(express.static(path.join(__dirname, '../public')));
