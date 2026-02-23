@@ -1,4 +1,4 @@
-const { Course, User, Enrollment, Transaction } = require('../models');
+const { Course, User, Enrollment } = require('../models');
 
 // List all available courses
 const getAllCourses = async (req, res, next) => {

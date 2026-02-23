@@ -72,9 +72,7 @@ const createCheckoutSession = async (req, res, next) => {
                             images: course.thumbnail ? [course.thumbnail] : [],
                         },
                         // Stripe requires minimum charge of ~$0.50 USD.
-                        // We treat the course price as USD and convert to BDT.
-                        // 1 USD ~ 100 BDT.
-                        unit_amount: Math.round(parseFloat(course.price) * 100), // Convert USD to BDT (in poisha)
+                        unit_amount: Math.round(parseFloat(course.price) * 100), // Convert USD to BDT HARDCODE
                     },
                     quantity: 1,
                 },
@@ -102,55 +100,6 @@ const createCheckoutSession = async (req, res, next) => {
         console.error('Stripe checkout error:', error);
         next(error);
     }
-};
-
-/**
- * Webhook handler for Stripe events
- * This is called by Stripe when payment is completed
- */
-const handleWebhook = async (req, res) => {
-    const sig = req.headers['stripe-signature'];
-    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
-    let event;
-
-    try {
-        // Verify webhook signature
-        if (webhookSecret) {
-            event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
-        } else {
-            // For testing without webhook secret
-            event = req.body;
-        }
-    } catch (err) {
-        console.error('Webhook signature verification failed:', err.message);
-        return res.status(400).send(`Webhook Error: ${err.message}`);
-    }
-
-    // Handle the event
-    if (event.type === 'checkout.session.completed') {
-        const session = event.data.object;
-
-        try {
-            // Extract metadata (IDs are UUIDs, not integers)
-            const userId = session.metadata.userId;
-            const courseId = session.metadata.courseId;
-            const instructorId = session.metadata.instructorId;
-            const amount = session.amount_total / 100; // Convert from cents
-
-            console.log(`Payment completed: User ${userId} purchased Course ${courseId} for ৳${amount}`);
-
-            // For now, we'll just log it
-            console.log(`Instructor ${instructorId} earned ৳${amount} from course sale`);
-
-            console.log('Enrollment and transaction created successfully');
-        } catch (error) {
-            console.error('Error processing webhook:', error);
-            return res.status(500).json({ error: 'Webhook processing failed' });
-        }
-    }
-
-    res.json({ received: true });
 };
 
 /**
@@ -307,7 +256,6 @@ const getInstructorEarnings = async (req, res, next) => {
 
 module.exports = {
     createCheckoutSession,
-    handleWebhook,
     verifyPayment,
     getInstructorEarnings
 };
